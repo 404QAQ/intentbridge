@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('ib')
   .description('IntentBridge — project context manager for Claude Code')
-  .version('1.0.0');
+  .version('1.1.0');
 
 // ib init
 program

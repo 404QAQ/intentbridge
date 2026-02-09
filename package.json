@@ -1,6 +1,6 @@
 {
   "name": "intentbridge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI tool that maintains project state and auto-generates CLAUDE.md for Claude Code context injection",
   "type": "module",
   "bin": {
