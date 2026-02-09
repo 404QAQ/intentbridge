@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { generate } from '../services/generator.js';
 import { readRequirements } from '../services/store.js';
+import { estimateTokens, formatTokenWarning } from '../utils/tokens.js';
 
 export function genCommand(focus?: string): void {
   let focusIds: string[] | undefined;
@@ -22,9 +23,16 @@ export function genCommand(focus?: string): void {
   }
 
   const block = generate(undefined, focusIds);
+  const tokens = estimateTokens(block);
+
   if (focusIds) {
-    console.log(chalk.green(`✔ CLAUDE.md updated (focus: ${focusIds.join(', ')})`));
+    console.log(chalk.green(`✔ CLAUDE.md updated (focus: ${focusIds.join(', ')}) — ~${tokens} tokens`));
   } else {
-    console.log(chalk.green('✔ CLAUDE.md updated'));
+    console.log(chalk.green(`✔ CLAUDE.md updated — ~${tokens} tokens`));
+  }
+
+  const warning = formatTokenWarning(tokens);
+  if (warning) {
+    console.log(chalk.yellow(warning));
   }
 }

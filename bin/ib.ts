@@ -6,6 +6,7 @@ import { reqAddCommand, reqListCommand, reqUpdateCommand, reqDoneCommand, reqRem
 import { mapAddCommand, mapRemoveCommand, mapListCommand, mapWhichCommand } from '../src/commands/map.js';
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
+import { syncCommand } from '../src/commands/sync.js';
 
 const program = new Command();
 
@@ -253,6 +254,19 @@ program
   .action(() => {
     try {
       statusCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib sync
+program
+  .command('sync')
+  .description('Detect and fix stale file mappings via git')
+  .action(async () => {
+    try {
+      await syncCommand();
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);

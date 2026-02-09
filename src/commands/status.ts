@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { readProject, readRequirements } from '../services/store.js';
+import { getClaudeMdTokens } from '../utils/tokens.js';
 
 export function statusCommand(): void {
   const project = readProject();
@@ -24,6 +25,14 @@ export function statusCommand(): void {
   console.log(`    ${chalk.green('Done')}          ${counts.done}`);
   console.log(`    ${chalk.bold('Total')}         ${data.requirements.length}`);
   console.log('');
+
+  // CLAUDE.md context size
+  const tokenInfo = getClaudeMdTokens();
+  if (tokenInfo) {
+    const tokenColor = tokenInfo.tokens > 4000 ? chalk.yellow : chalk.dim;
+    console.log(`  CLAUDE.md: ${tokenColor(`~${tokenInfo.tokens} tokens (${tokenInfo.chars} chars)`)}`);
+    console.log('');
+  }
 
   // Show currently active/implementing
   const current = data.requirements.filter(
