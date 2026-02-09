@@ -7,7 +7,50 @@ const START_MARKER = '<!-- INTENTBRIDGE:START - 此区块由 IntentBridge 自动
 const START_MARKER_PREFIX = '<!-- INTENTBRIDGE:START';
 const END_MARKER = '<!-- INTENTBRIDGE:END -->';
 
-export function generateBlock(project: ProjectConfig, requirements: RequirementsData): string {
+function renderRequirement(lines: string[], r: Requirement): void {
+  lines.push(`### ${r.id} [${r.status}] ${r.title}`);
+  if (r.depends_on && r.depends_on.length > 0) {
+    lines.push(`依赖: ${r.depends_on.join(', ')}`);
+  }
+  lines.push(r.description);
+  if (r.acceptance && r.acceptance.length > 0) {
+    lines.push('验收条件:');
+    for (const ac of r.acceptance) {
+      lines.push(`- [${ac.done ? 'x' : ' '}] ${ac.criterion}`);
+    }
+  }
+  if (r.notes && r.notes.length > 0) {
+    lines.push('决策记录:');
+    for (const n of r.notes) {
+      lines.push(`- [${n.date}] ${n.content}`);
+    }
+  }
+  if (r.files.length > 0) {
+    lines.push(`相关文件: ${r.files.join(', ')}`);
+  }
+  lines.push('');
+}
+
+// Expand focus set to include transitive dependencies
+function expandFocusWithDeps(focusIds: string[], requirements: Requirement[]): Set<string> {
+  const result = new Set(focusIds);
+  const queue = [...focusIds];
+  while (queue.length > 0) {
+    const id = queue.pop()!;
+    const req = requirements.find((r) => r.id === id);
+    if (req?.depends_on) {
+      for (const depId of req.depends_on) {
+        if (!result.has(depId)) {
+          result.add(depId);
+          queue.push(depId);
+        }
+      }
+    }
+  }
+  return result;
+}
+
+export function generateBlock(project: ProjectConfig, requirements: RequirementsData, focusIds?: string[]): string {
   const lines: string[] = [START_MARKER, ''];
 
   // Project overview
@@ -33,38 +76,54 @@ export function generateBlock(project: ProjectConfig, requirements: Requirements
     lines.push('');
   }
 
-  // Active/implementing requirements
-  const active = requirements.requirements.filter(
-    (r) => r.status === 'active' || r.status === 'implementing'
-  );
-  if (active.length > 0) {
-    lines.push('## 当前需求（活跃/进行中）');
-    lines.push('');
-    for (const r of active) {
-      lines.push(`### ${r.id} [${r.status}] ${r.title}`);
-      lines.push(r.description);
-      if (r.files.length > 0) {
-        lines.push(`相关文件: ${r.files.join(', ')}`);
+  // Determine which requirements to include
+  const isFocusMode = focusIds && focusIds.length > 0;
+  const focusSet = isFocusMode
+    ? expandFocusWithDeps(focusIds, requirements.requirements)
+    : new Set<string>();
+
+  if (isFocusMode) {
+    // Focus mode: only show focused requirements regardless of status
+    const focused = requirements.requirements.filter((r) => focusSet.has(r.id));
+    if (focused.length > 0) {
+      lines.push('## 聚焦需求');
+      lines.push('');
+      for (const r of focused) {
+        renderRequirement(lines, r);
+      }
+    }
+  } else {
+    // Normal mode: active/implementing requirements
+    const active = requirements.requirements.filter(
+      (r) => r.status === 'active' || r.status === 'implementing'
+    );
+    if (active.length > 0) {
+      lines.push('## 当前需求（活跃/进行中）');
+      lines.push('');
+      for (const r of active) {
+        renderRequirement(lines, r);
+      }
+    }
+
+    // Done requirements (last 5)
+    const done = requirements.requirements
+      .filter((r) => r.status === 'done')
+      .slice(-5);
+    if (done.length > 0) {
+      lines.push('## 已完成需求（最近 5 个）');
+      for (const r of done) {
+        lines.push(`- ${r.id} ${r.title} ✓`);
       }
       lines.push('');
     }
   }
 
-  // Done requirements (last 5)
-  const done = requirements.requirements
-    .filter((r) => r.status === 'done')
-    .slice(-5);
-  if (done.length > 0) {
-    lines.push('## 已完成需求（最近 5 个）');
-    for (const r of done) {
-      lines.push(`- ${r.id} ${r.title} ✓`);
-    }
-    lines.push('');
-  }
-
-  // Code mapping index
+  // Code mapping index (filtered in focus mode)
+  const sourceReqs = isFocusMode
+    ? requirements.requirements.filter((r) => focusSet.has(r.id))
+    : requirements.requirements;
   const fileMap = new Map<string, string[]>();
-  for (const r of requirements.requirements) {
+  for (const r of sourceReqs) {
     for (const f of r.files) {
       if (!fileMap.has(f)) fileMap.set(f, []);
       fileMap.get(f)!.push(r.id);
@@ -109,10 +168,10 @@ export function writeClaudeMd(block: string, cwd?: string): void {
   writeFileSync(path, block + '\n');
 }
 
-export function generate(cwd?: string): string {
+export function generate(cwd?: string, focusIds?: string[]): string {
   const project = readProject(cwd);
   const requirements = readRequirements(cwd);
-  const block = generateBlock(project, requirements);
+  const block = generateBlock(project, requirements, focusIds);
   writeClaudeMd(block, cwd);
   return block;
 }

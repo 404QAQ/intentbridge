@@ -19,6 +19,9 @@ export interface Requirement {
   priority: RequirementPriority;
   created: string;
   files: string[];
+  notes?: Array<{ date: string; content: string }>;
+  acceptance?: Array<{ criterion: string; done: boolean }>;
+  depends_on?: string[];
 }
 
 export interface RequirementsData {

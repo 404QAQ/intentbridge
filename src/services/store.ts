@@ -139,3 +139,82 @@ export function removeFileMapping(id: string, file: string, cwd?: string): Requi
   writeRequirements(data, cwd);
   return req;
 }
+
+export function addNote(id: string, content: string, cwd?: string): Requirement {
+  const data = readRequirements(cwd);
+  const req = data.requirements.find((r) => r.id === id);
+  if (!req) throw new Error(`Requirement ${id} not found`);
+  if (!req.notes) req.notes = [];
+  req.notes.push({
+    date: new Date().toISOString().split('T')[0],
+    content,
+  });
+  writeRequirements(data, cwd);
+  return req;
+}
+
+export function addAcceptanceCriterion(id: string, criterion: string, cwd?: string): Requirement {
+  const data = readRequirements(cwd);
+  const req = data.requirements.find((r) => r.id === id);
+  if (!req) throw new Error(`Requirement ${id} not found`);
+  if (!req.acceptance) req.acceptance = [];
+  req.acceptance.push({ criterion, done: false });
+  writeRequirements(data, cwd);
+  return req;
+}
+
+export function acceptCriterion(id: string, index: number, cwd?: string): Requirement {
+  const data = readRequirements(cwd);
+  const req = data.requirements.find((r) => r.id === id);
+  if (!req) throw new Error(`Requirement ${id} not found`);
+  if (!req.acceptance || index < 0 || index >= req.acceptance.length) {
+    throw new Error(`Invalid acceptance criterion index ${index}`);
+  }
+  req.acceptance[index].done = true;
+  writeRequirements(data, cwd);
+  return req;
+}
+
+export function addDependency(id: string, depId: string, cwd?: string): Requirement {
+  const data = readRequirements(cwd);
+  const req = data.requirements.find((r) => r.id === id);
+  if (!req) throw new Error(`Requirement ${id} not found`);
+  const dep = data.requirements.find((r) => r.id === depId);
+  if (!dep) throw new Error(`Requirement ${depId} not found`);
+  if (id === depId) throw new Error('A requirement cannot depend on itself');
+  if (!req.depends_on) req.depends_on = [];
+  if (req.depends_on.includes(depId)) return req;
+
+  // Cycle detection: check if depId transitively depends on id
+  const visited = new Set<string>();
+  const queue = [depId];
+  while (queue.length > 0) {
+    const current = queue.pop()!;
+    if (visited.has(current)) continue;
+    visited.add(current);
+    const r = data.requirements.find((r) => r.id === current);
+    if (r?.depends_on) {
+      for (const d of r.depends_on) {
+        if (d === id) throw new Error(`Circular dependency: ${id} → ${depId} → ... → ${id}`);
+        queue.push(d);
+      }
+    }
+  }
+
+  req.depends_on.push(depId);
+  writeRequirements(data, cwd);
+  return req;
+}
+
+export function removeDependency(id: string, depId: string, cwd?: string): Requirement {
+  const data = readRequirements(cwd);
+  const req = data.requirements.find((r) => r.id === id);
+  if (!req) throw new Error(`Requirement ${id} not found`);
+  if (!req.depends_on) throw new Error(`${id} has no dependencies`);
+  const idx = req.depends_on.indexOf(depId);
+  if (idx === -1) throw new Error(`${id} does not depend on ${depId}`);
+  req.depends_on.splice(idx, 1);
+  if (req.depends_on.length === 0) delete req.depends_on;
+  writeRequirements(data, cwd);
+  return req;
+}

@@ -37,3 +37,27 @@ export function mapListCommand(): void {
   }
   console.log('');
 }
+
+export function mapWhichCommand(file: string): void {
+  const data = readRequirements();
+  const matches = data.requirements.filter((r) =>
+    r.files.some((f) => f.includes(file))
+  );
+
+  if (matches.length === 0) {
+    console.log(chalk.dim(`No requirements mapped to "${file}".`));
+    return;
+  }
+
+  console.log(chalk.bold(`Requirements related to "${file}":`));
+  console.log('');
+  for (const r of matches) {
+    const statusColor =
+      r.status === 'implementing' ? chalk.magenta :
+      r.status === 'active' ? chalk.blue :
+      r.status === 'done' ? chalk.green :
+      chalk.dim;
+    console.log(`  ${r.id}  ${statusColor(`[${r.status}]`)}  ${r.title}`);
+  }
+  console.log('');
+}

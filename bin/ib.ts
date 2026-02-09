@@ -2,8 +2,8 @@
 
 import { Command } from 'commander';
 import { initCommand } from '../src/commands/init.js';
-import { reqAddCommand, reqListCommand, reqUpdateCommand, reqDoneCommand, reqRemoveCommand } from '../src/commands/req.js';
-import { mapAddCommand, mapRemoveCommand, mapListCommand } from '../src/commands/map.js';
+import { reqAddCommand, reqListCommand, reqUpdateCommand, reqDoneCommand, reqRemoveCommand, reqNoteCommand, reqNotesCommand, reqAcCommand, reqAcceptCommand, reqAcListCommand, reqDepCommand, reqUndepCommand, reqDepsCommand } from '../src/commands/req.js';
+import { mapAddCommand, mapRemoveCommand, mapListCommand, mapWhichCommand } from '../src/commands/map.js';
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 
@@ -95,6 +95,102 @@ req
     }
   });
 
+req
+  .command('note <id> <message>')
+  .description('Add a decision note to a requirement')
+  .action((id: string, message: string) => {
+    try {
+      reqNoteCommand(id, message);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('notes <id>')
+  .description('Show all notes for a requirement')
+  .action((id: string) => {
+    try {
+      reqNotesCommand(id);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('ac <id> <criterion>')
+  .description('Add an acceptance criterion to a requirement')
+  .action((id: string, criterion: string) => {
+    try {
+      reqAcCommand(id, criterion);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('accept <id> <index>')
+  .description('Mark an acceptance criterion as done')
+  .action((id: string, index: string) => {
+    try {
+      reqAcceptCommand(id, index);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('ac-list <id>')
+  .description('List acceptance criteria for a requirement')
+  .action((id: string) => {
+    try {
+      reqAcListCommand(id);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('dep <id> <depends-on-id>')
+  .description('Add a dependency (id depends on depends-on-id)')
+  .action((id: string, depId: string) => {
+    try {
+      reqDepCommand(id, depId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('undep <id> <depends-on-id>')
+  .description('Remove a dependency')
+  .action((id: string, depId: string) => {
+    try {
+      reqUndepCommand(id, depId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('deps <id>')
+  .description('Show dependencies for a requirement')
+  .action((id: string) => {
+    try {
+      reqDepsCommand(id);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
 // ib map
 const map = program
   .command('map')
@@ -140,9 +236,10 @@ map
 program
   .command('gen')
   .description('Generate/update CLAUDE.md')
-  .action(() => {
+  .option('-f, --focus <ids>', 'Focus on specific requirement IDs (comma-separated)')
+  .action((options: { focus?: string }) => {
     try {
-      genCommand();
+      genCommand(options.focus);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
