@@ -1,120 +1,120 @@
 # IntentBridge
 
-CLI tool that maintains project state and auto-generates `CLAUDE.md` for Claude Code context injection.
+维护项目状态并自动生成 `CLAUDE.md` 的 CLI 工具，为 Claude Code 提供项目上下文注入。
 
-IntentBridge tracks your project's requirements, maps source files to those requirements, and generates a structured `CLAUDE.md` file that gives Claude Code full awareness of your project context.
+IntentBridge 跟踪项目需求、将源文件映射到需求，并生成结构化的 `CLAUDE.md` 文件，让 Claude Code 充分了解你的项目上下文。
 
-## Installation
+## 安装
 
 ```bash
 npm install -g intentbridge
 ```
 
-Or use directly with npx:
+或通过 npx 直接使用：
 
 ```bash
 npx intentbridge <command>
 ```
 
-## Quick Start
+## 快速开始
 
 ```bash
-# Initialize in your project directory
+# 在项目目录中初始化
 ib init
 
-# Add a requirement
+# 添加需求
 ib req add
 
-# Map files to a requirement
+# 将文件映射到需求
 ib map add REQ-001 src/auth.ts src/login.vue
 
-# Generate/update CLAUDE.md
+# 生成/更新 CLAUDE.md
 ib gen
 ```
 
-## Commands
+## 命令
 
 ### `ib init`
 
-Initialize IntentBridge in the current directory. Creates a `.intentbridge/` directory with project config and an initial `CLAUDE.md`.
+在当前目录初始化 IntentBridge。创建 `.intentbridge/` 目录（包含项目配置）和初始 `CLAUDE.md`。
 
 ### `ib req`
 
-Manage requirements:
+管理需求：
 
-| Subcommand | Description |
+| 子命令 | 说明 |
 |---|---|
-| `ib req add` | Add a new requirement (interactive) |
-| `ib req list` | List all requirements grouped by status |
-| `ib req update <id>` | Update status/title/description (`-s`, `-t`, `-d`) |
-| `ib req done <id>` | Mark a requirement as done |
-| `ib req remove <id>` | Remove a requirement |
+| `ib req add` | 添加新需求（交互式） |
+| `ib req list` | 按状态分组列出所有需求 |
+| `ib req update <id>` | 更新状态/标题/描述（`-s`、`-t`、`-d`） |
+| `ib req done <id>` | 标记需求为已完成 |
+| `ib req remove <id>` | 删除需求 |
 
-Statuses: `draft` → `active` → `implementing` → `done`
+状态流转：`draft` → `active` → `implementing` → `done`
 
-Priorities: `high`, `medium`, `low`
+优先级：`high`、`medium`、`low`
 
 ### `ib map`
 
-Map source files to requirements:
+将源文件映射到需求：
 
-| Subcommand | Description |
+| 子命令 | 说明 |
 |---|---|
-| `ib map add <req-id> <files...>` | Map one or more files to a requirement |
-| `ib map remove <req-id> <file>` | Remove a file mapping |
-| `ib map list` | List all file mappings |
+| `ib map add <req-id> <files...>` | 将一个或多个文件映射到需求 |
+| `ib map remove <req-id> <file>` | 移除文件映射 |
+| `ib map list` | 列出所有文件映射 |
 
 ### `ib gen`
 
-Generate or update `CLAUDE.md` with the current project context. The generated block includes:
+生成或更新 `CLAUDE.md`，写入当前项目上下文。生成的内容包括：
 
-- Project overview and tech stack
-- Active/implementing requirements with mapped files
-- Recently completed requirements
-- Code mapping index (file → requirement)
+- 项目概述和技术栈
+- 活跃/进行中的需求及关联文件
+- 最近完成的需求
+- 代码映射索引（文件 → 需求）
 
 ### `ib status`
 
-Show a project status overview with requirement counts by status.
+显示项目状态概览，按状态统计需求数量。
 
-## How It Works
+## 工作原理
 
-IntentBridge stores project state in `.intentbridge/` as YAML files:
+IntentBridge 将项目状态以 YAML 文件存储在 `.intentbridge/` 目录中：
 
 ```
 .intentbridge/
-  project.yaml        # Project name, description, tech stack, conventions
-  requirements.yaml   # All requirements with status, priority, file mappings
+  project.yaml        # 项目名称、描述、技术栈、约定
+  requirements.yaml   # 所有需求（状态、优先级、文件映射）
 ```
 
-Running `ib gen` reads these files and produces a structured block in `CLAUDE.md`, wrapped in `<!-- INTENTBRIDGE:START -->` / `<!-- INTENTBRIDGE:END -->` markers. Existing content in `CLAUDE.md` outside these markers is preserved.
+运行 `ib gen` 会读取这些文件，在 `CLAUDE.md` 中生成结构化内容块，以 `<!-- INTENTBRIDGE:START -->` / `<!-- INTENTBRIDGE:END -->` 标记包裹。标记外的已有内容会被保留。
 
-## Development
+## 开发
 
 ```bash
-# Install dependencies
+# 安装依赖
 npm install
 
-# Run in dev mode
+# 开发模式运行
 npm run dev -- <command>
 
-# Run tests
+# 运行测试
 npm test
 
-# Build
+# 构建
 npm run build
 ```
 
 ## Docker
 
 ```bash
-# Run tests in Docker
+# 在 Docker 中运行测试
 docker compose run test
 
-# Use CLI via Docker
+# 通过 Docker 使用 CLI
 docker compose run cli status
 ```
 
-## License
+## 许可证
 
 MIT

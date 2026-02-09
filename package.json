@@ -20,7 +20,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luohaoqi/intentbridge.git"
+    "url": "git+https://github.com/404QAQ/intentbridge.git"
   },
   "engines": {
     "node": ">=18"
