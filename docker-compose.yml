@@ -1,0 +1,16 @@
+services:
+  cli:
+    build: .
+    volumes:
+      - ./workspace:/workspace
+    working_dir: /workspace
+    entrypoint: ["node", "/app/dist/bin/ib.js"]
+
+  test:
+    build:
+      context: .
+      target: builder
+    working_dir: /app
+    command: ["npx", "vitest", "run"]
+    volumes:
+      - ./tests:/app/tests:ro

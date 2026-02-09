@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.intentbridge/
+.git/
+*.tgz
+*.md
+.gitignore
+tests/
+vitest.config.ts
