@@ -233,6 +233,18 @@ map
     }
   });
 
+map
+  .command('which <file>')
+  .description('Find requirements related to a file')
+  .action((file: string) => {
+    try {
+      mapWhichCommand(file);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
 // ib gen
 program
   .command('gen')

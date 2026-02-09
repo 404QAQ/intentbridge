@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { writeProject, writeRequirements, addRequirement } from '../src/services/store.js';
+import { writeProject, writeRequirements, addRequirement, addFileMapping, updateRequirement } from '../src/services/store.js';
 import type { ProjectConfig } from '../src/models/types.js';
 
 const CLI = resolve(import.meta.dirname, '..', 'bin', 'ib.ts');
@@ -44,7 +44,7 @@ afterEach(() => {
 describe('ib --version', () => {
   it('prints version', () => {
     const out = run('--version');
-    expect(out.trim()).toBe('1.0.0');
+    expect(out.trim()).toBe('1.1.0');
   });
 });
 
@@ -123,6 +123,60 @@ describe('ib req remove', () => {
   });
 });
 
+describe('ib req note', () => {
+  beforeEach(() => {
+    initProject();
+    addRequirement('Feature', 'Desc', 'medium', cwd);
+  });
+
+  it('adds and shows decision notes', () => {
+    run('req note REQ-001 决定用JWT认证');
+    const out = run('req notes REQ-001');
+    expect(out).toContain('决定用JWT认证');
+  });
+});
+
+describe('ib req acceptance', () => {
+  beforeEach(() => {
+    initProject();
+    addRequirement('Feature', 'Desc', 'medium', cwd);
+  });
+
+  it('adds and lists acceptance criteria', () => {
+    run('req ac REQ-001 登录功能正常');
+    const out = run('req ac-list REQ-001');
+    expect(out).toContain('登录功能正常');
+  });
+
+  it('marks acceptance criterion as done', () => {
+    run('req ac REQ-001 登录功能正常');
+    run('req accept REQ-001 0');
+    const out = run('req ac-list REQ-001');
+    expect(out).toMatch(/✔|done|x/i);
+  });
+});
+
+describe('ib req dep', () => {
+  beforeEach(() => {
+    initProject();
+    addRequirement('Auth', 'Auth module', 'high', cwd);
+    addRequirement('Profile', 'User profile', 'medium', cwd);
+  });
+
+  it('adds and shows dependencies', () => {
+    run('req dep REQ-002 REQ-001');
+    const out = run('req deps REQ-002');
+    expect(out).toContain('REQ-001');
+  });
+
+  it('removes a dependency', () => {
+    run('req dep REQ-002 REQ-001');
+    run('req undep REQ-002 REQ-001');
+    const out = run('req deps REQ-002');
+    expect(out).toContain('has no dependencies');
+  });
+});
+
 describe('ib map', () => {
   beforeEach(() => {
     initProject();
@@ -147,6 +201,17 @@ describe('ib map', () => {
   it('shows empty message when no mappings', () => {
     const out = run('map list');
     expect(out).toContain('No file mappings');
+  });
+  it('finds requirements by file (map which)', () => {
+    run('map add REQ-001 src/a.ts');
+    const out = run('map which src/a.ts');
+    expect(out).toContain('REQ-001');
+    expect(out).toContain('Feature');
+  });
+
+  it('shows empty message for unmatched file', () => {
+    const out = run('map which unknown.ts');
+    expect(out).toContain('No requirements');
   });
 });
 
@@ -176,6 +241,19 @@ describe('ib gen', () => {
     const md = readFileSync(join(cwd, 'CLAUDE.md'), 'utf-8');
     expect(md).toContain('REQ-001');
     expect(md).toContain('implementing');
+  });
+  it('generates with --focus flag', () => {
+    initProject();
+    addRequirement('Feature A', 'Desc A', 'high', cwd);
+    addRequirement('Feature B', 'Desc B', 'medium', cwd);
+    updateRequirement('REQ-001', { status: 'active' }, cwd);
+    updateRequirement('REQ-002', { status: 'active' }, cwd);
+    const out = run('gen --focus REQ-001');
+
+    const md = readFileSync(join(cwd, 'CLAUDE.md'), 'utf-8');
+    expect(md).toContain('REQ-001');
+    expect(md).not.toContain('REQ-002');
+    expect(out).toContain('focus');
   });
 });
 
