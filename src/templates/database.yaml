@@ -1,0 +1,14 @@
+title: "数据库 {表名} 迁移"
+description: "创建 {表名} 数据表和迁移脚本"
+tags: ["backend", "database"]
+acceptance:
+  - criterion: "数据库表设计"
+    done: false
+  - criterion: "字段定义和索引"
+    done: false
+  - criterion: "创建迁移脚本"
+    done: false
+  - criterion: "回滚脚本"
+    done: false
+  - criterion: "数据验证测试"
+    done: false

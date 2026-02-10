@@ -9,14 +9,27 @@ import {
   acceptCriterion,
   addDependency,
   removeDependency,
+  searchRequirements,
+  addTag,
+  removeTag,
+  getTags,
+  findByTag,
 } from '../services/store.js';
+import { exportRequirements } from '../services/exporter.js';
+import { loadTemplate, listTemplates, applyTemplate, getTemplateVariables } from '../services/template.js';
 import { prompt, promptWithDefault, closePrompt } from '../utils/prompt.js';
+import { writeFileSync } from 'node:fs';
 import type { RequirementPriority, RequirementStatus } from '../models/types.js';
 
 const VALID_STATUSES: RequirementStatus[] = ['draft', 'active', 'implementing', 'done'];
 const VALID_PRIORITIES: RequirementPriority[] = ['high', 'medium', 'low'];
 
-export async function reqAddCommand(): Promise<void> {
+export async function reqAddCommand(template?: string): Promise<void> {
+  if (template) {
+    await reqAddCommandWithTemplate(template);
+    return;
+  }
+
   console.log(chalk.bold('Add Requirement'));
   console.log('');
 
@@ -208,4 +221,198 @@ export function reqDepsCommand(id: string): void {
     console.log(`  → ${label}`);
   }
   console.log('');
+}
+
+export function reqSearchCommand(keyword: string): void {
+  if (!keyword || keyword.trim() === '') {
+    console.log(chalk.red('Search keyword is required.'));
+    return;
+  }
+
+  const results = searchRequirements(keyword);
+
+  if (results.length === 0) {
+    console.log(chalk.dim(`No requirements found matching "${keyword}".`));
+    return;
+  }
+
+  console.log(chalk.bold(`Found ${results.length} requirement${results.length > 1 ? 's' : ''} matching "${keyword}":`));
+  console.log('');
+
+  for (const req of results) {
+    const statusColor =
+      req.status === 'implementing' ? chalk.magenta :
+      req.status === 'active' ? chalk.blue :
+      req.status === 'done' ? chalk.green :
+      chalk.dim;
+    const prio =
+      req.priority === 'high' ? chalk.red('H') :
+      req.priority === 'medium' ? chalk.yellow('M') :
+      chalk.dim('L');
+
+    console.log(`  ${req.id} ${statusColor(`[${req.status}]`)} ${prio} ${chalk.bold(req.title)}`);
+
+    // Show matching context
+    const lowerKeyword = keyword.toLowerCase();
+    let matchedIn = false;
+
+    if (req.description.toLowerCase().includes(lowerKeyword)) {
+      const preview = req.description.length > 60
+        ? req.description.substring(0, 60) + '...'
+        : req.description;
+      console.log(`    ${chalk.dim('描述:')} ${preview}`);
+      matchedIn = true;
+    }
+
+    if (req.notes && req.notes.some((n) => n.content.toLowerCase().includes(lowerKeyword))) {
+      const matchingNotes = req.notes.filter((n) => n.content.toLowerCase().includes(lowerKeyword));
+      for (const note of matchingNotes) {
+        const preview = note.content.length > 60
+          ? note.content.substring(0, 60) + '...'
+          : note.content;
+        console.log(`    ${chalk.dim('决策:')} ${preview}`);
+      }
+      matchedIn = true;
+    }
+
+    console.log('');
+  }
+}
+
+export function reqTagCommand(id: string, tag: string): void {
+  if (!tag || tag.trim() === '') {
+    console.log(chalk.red('Tag is required.'));
+    return;
+  }
+  const req = addTag(id, tag);
+  const tags = req.tags?.join(', ') || 'none';
+  console.log(chalk.green(`✔ Added tag "${tag}" to ${req.id}`));
+  console.log(chalk.dim(`  Tags: ${tags}`));
+  console.log(chalk.dim('  Run `ib gen` to update CLAUDE.md'));
+}
+
+export function reqUntagCommand(id: string, tag: string): void {
+  const req = removeTag(id, tag);
+  const tags = req.tags?.join(', ') || 'none';
+  console.log(chalk.green(`✔ Removed tag "${tag}" from ${req.id}`));
+  console.log(chalk.dim(`  Tags: ${tags}`));
+  console.log(chalk.dim('  Run `ib gen` to update CLAUDE.md'));
+}
+
+export function reqTagsCommand(): void {
+  const tagCounts = getTags();
+  if (tagCounts.size === 0) {
+    console.log(chalk.dim('No tags found. Use `ib req tag <id> <tag>` to add tags.'));
+    return;
+  }
+
+  console.log(chalk.bold(`All tags (${Array.from(tagCounts.values()).reduce((a, b) => a + b, 0)} requirements):`));
+  console.log('');
+
+  // Sort by count (descending), then by name
+  const sortedTags = Array.from(tagCounts.entries()).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1]; // count desc
+    return a[0].localeCompare(b[0]); // name asc
+  });
+
+  for (const [tag, count] of sortedTags) {
+    console.log(`  ${chalk.cyan(tag.padEnd(15))} ${chalk.yellow(`(${count})`)}`);
+  }
+  console.log('');
+}
+
+export function reqExportCommand(format: 'markdown' | 'json', output?: string): void {
+  const content = exportRequirements(format);
+
+  if (output) {
+    writeFileSync(output, content, 'utf-8');
+    console.log(chalk.green(`✔ Exported to ${chalk.bold(output)}`));
+  } else {
+    console.log(content);
+  }
+}
+
+export async function reqAddCommandWithTemplate(templateName: string): Promise<void> {
+  const template = loadTemplate(templateName);
+  if (!template) {
+    console.log(chalk.red(`Template "${templateName}" not found.`));
+    console.log(chalk.dim('Run `ib req templates` to list available templates.'));
+    closePrompt();
+    return;
+  }
+
+  console.log(chalk.bold(`Using template: ${templateName}`));
+  console.log(chalk.dim(`  ${template.description}`));
+  console.log('');
+
+  // Get variables from template
+  const variables = getTemplateVariables(template);
+  const variableValues: Record<string, string> = {};
+
+  for (const v of variables) {
+    const value = await prompt(`${v}: `);
+    if (!value) {
+      console.log(chalk.red(`${v} is required.`));
+      closePrompt();
+      return;
+    }
+    variableValues[v] = value;
+  }
+
+  // Apply template
+  const requirementData = applyTemplate(template, variableValues);
+
+  // Ask for priority
+  const prioInput = await promptWithDefault('Priority (high/medium/low)', 'medium');
+  const priority = VALID_PRIORITIES.includes(prioInput as RequirementPriority)
+    ? (prioInput as RequirementPriority)
+    : 'medium';
+
+  // Ask for additional tags
+  const additionalTagsInput = await promptWithDefault('Additional tags (comma-separated)', '');
+  const additionalTags = additionalTagsInput
+    .split(',')
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => t);
+
+  const allTags = [...new Set([...(requirementData.tags || []), ...additionalTags])];
+
+  // Create requirement
+  const { addRequirementFromTemplate } = await import('../services/store.js');
+  const req = addRequirementFromTemplate(
+    requirementData.title,
+    requirementData.description,
+    priority,
+    allTags,
+    requirementData.acceptance || []
+  );
+
+  console.log('');
+  console.log(chalk.green(`✔ Created ${chalk.bold(req.id)}: ${req.title}`));
+  if (req.tags && req.tags.length > 0) {
+    console.log(chalk.dim(`  Tags: ${req.tags.join(', ')}`));
+  }
+  if (req.acceptance && req.acceptance.length > 0) {
+    console.log(chalk.dim(`  Acceptance criteria: ${req.acceptance.length} items`));
+  }
+  console.log(chalk.dim('  Run `ib gen` to update CLAUDE.md'));
+  closePrompt();
+}
+
+export function reqTemplatesCommand(): void {
+  const templates = listTemplates();
+
+  if (templates.size === 0) {
+    console.log(chalk.dim('No templates available.'));
+    return;
+  }
+
+  console.log(chalk.bold('Available templates:'));
+  console.log('');
+
+  for (const [name, info] of templates) {
+    console.log(`  ${chalk.cyan(name.padEnd(15))} ${info.description}`);
+  }
+  console.log('');
+  console.log(chalk.dim('Usage: ib req add --template <name>'));
 }

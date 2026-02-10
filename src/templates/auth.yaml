@@ -1,0 +1,16 @@
+title: "认证授权"
+description: "实现用户认证和授权系统"
+tags: ["backend", "security", "frontend"]
+acceptance:
+  - criterion: "用户注册接口"
+    done: false
+  - criterion: "用户登录接口"
+    done: false
+  - criterion: "Token 生成和验证"
+    done: false
+  - criterion: "Token 刷新机制"
+    done: false
+  - criterion: "密码加密存储"
+    done: false
+  - criterion: "登录失败锁定"
+    done: false

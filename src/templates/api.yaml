@@ -1,0 +1,16 @@
+title: "API {功能名}"
+description: "实现 {功能名} 的 RESTful API"
+tags: ["backend", "api"]
+acceptance:
+  - criterion: "GET /api/{资源} - 列表查询"
+    done: false
+  - criterion: "GET /api/{资源}/:id - 单个查询"
+    done: false
+  - criterion: "POST /api/{资源} - 创建"
+    done: false
+  - criterion: "PUT /api/{资源}/:id - 更新"
+    done: false
+  - criterion: "DELETE /api/{资源}/:id - 删除"
+    done: false
+  - criterion: "API 文档"
+    done: false

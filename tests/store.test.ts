@@ -14,6 +14,12 @@ import {
   addFileMapping,
   removeFileMapping,
   getNextReqId,
+  addNote,
+  searchRequirements,
+  addTag,
+  removeTag,
+  getTags,
+  findByTag,
 } from '../src/services/store.js';
 import type { ProjectConfig, RequirementsData } from '../src/models/types.js';
 
@@ -137,5 +143,155 @@ describe('file mappings', () => {
 
   it('throws on unmapped file removal', () => {
     expect(() => removeFileMapping('REQ-001', 'nope.ts', tmpDir)).toThrow('not mapped');
+  });
+});
+
+describe('search requirements', () => {
+  beforeEach(() => {
+    writeProject(makeProject(), tmpDir);
+    writeRequirements({ requirements: [] }, tmpDir);
+    addRequirement('User Authentication', 'Implement JWT login system', 'high', tmpDir);
+    addRequirement('User Profile', 'Manage user profile data', 'medium', tmpDir);
+    addRequirement('API Documentation', 'Document all API endpoints', 'low', tmpDir);
+  });
+
+  it('finds requirements by title', () => {
+    const results = searchRequirements('authentication', tmpDir);
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe('REQ-001');
+    expect(results[0].title).toBe('User Authentication');
+  });
+
+  it('finds requirements by description', () => {
+    const results = searchRequirements('JWT', tmpDir);
+    expect(results).toHaveLength(1);
+    expect(results[0].title).toBe('User Authentication');
+  });
+
+  it('finds requirements by ID (case insensitive)', () => {
+    const results = searchRequirements('req-001', tmpDir);
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe('REQ-001');
+  });
+
+  it('finds multiple requirements matching keyword', () => {
+    const results = searchRequirements('user', tmpDir);
+    expect(results).toHaveLength(2);
+    const titles = results.map((r) => r.title).sort();
+    expect(titles).toEqual(['User Authentication', 'User Profile']);
+  });
+
+  it('returns empty array when no matches', () => {
+    const results = searchRequirements('nonexistent', tmpDir);
+    expect(results).toHaveLength(0);
+  });
+
+  it('searches in notes', () => {
+    addNote('REQ-001', 'Use JWT for security', tmpDir);
+    const results = searchRequirements('security', tmpDir);
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe('REQ-001');
+  });
+
+  it('is case insensitive', () => {
+    const results1 = searchRequirements('AUTHENTICATION', tmpDir);
+    const results2 = searchRequirements('authentication', tmpDir);
+    const results3 = searchRequirements('AuThEnTiCaTiOn', tmpDir);
+    expect(results1).toHaveLength(1);
+    expect(results2).toHaveLength(1);
+    expect(results3).toHaveLength(1);
+  });
+});
+
+describe('tags', () => {
+  beforeEach(() => {
+    writeProject(makeProject(), tmpDir);
+    writeRequirements({ requirements: [] }, tmpDir);
+    addRequirement('User Authentication', 'Implement JWT login', 'high', tmpDir);
+    addRequirement('User Profile', 'Manage profile', 'medium', tmpDir);
+    addRequirement('API Docs', 'Document API', 'low', tmpDir);
+  });
+
+  it('adds a tag to a requirement', () => {
+    const req = addTag('REQ-001', 'frontend', tmpDir);
+    expect(req.tags).toEqual(['frontend']);
+  });
+
+  it('normalizes tags to lowercase', () => {
+    const req = addTag('REQ-001', 'FrontEnd', tmpDir);
+    expect(req.tags).toEqual(['frontend']);
+  });
+
+  it('adds multiple tags to a requirement', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    addTag('REQ-001', 'backend', tmpDir);
+    addTag('REQ-001', 'security', tmpDir);
+    const req = readRequirements(tmpDir).requirements.find((r) => r.id === 'REQ-001')!;
+    expect(req.tags).toEqual(['frontend', 'backend', 'security']);
+  });
+
+  it('prevents duplicate tags', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    const req = addTag('REQ-001', 'frontend', tmpDir);
+    expect(req.tags).toEqual(['frontend']);
+  });
+
+  it('removes a tag from a requirement', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    addTag('REQ-001', 'backend', tmpDir);
+    const req = removeTag('REQ-001', 'frontend', tmpDir);
+    expect(req.tags).toEqual(['backend']);
+  });
+
+  it('deletes tags array when last tag is removed', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    const req = removeTag('REQ-001', 'frontend', tmpDir);
+    expect(req.tags).toBeUndefined();
+  });
+
+  it('throws when removing non-existent tag', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    expect(() => removeTag('REQ-001', 'backend', tmpDir)).toThrow('does not have tag');
+  });
+
+  it('throws when removing tag from requirement with no tags', () => {
+    expect(() => removeTag('REQ-001', 'frontend', tmpDir)).toThrow('has no tags');
+  });
+
+  it('gets all tags with counts', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    addTag('REQ-001', 'backend', tmpDir);
+    addTag('REQ-002', 'frontend', tmpDir);
+    addTag('REQ-003', 'database', tmpDir);
+
+    const tags = getTags(tmpDir);
+    expect(tags.get('frontend')).toBe(2);
+    expect(tags.get('backend')).toBe(1);
+    expect(tags.get('database')).toBe(1);
+  });
+
+  it('returns empty map when no tags exist', () => {
+    const tags = getTags(tmpDir);
+    expect(tags.size).toBe(0);
+  });
+
+  it('finds requirements by tag', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    addTag('REQ-002', 'frontend', tmpDir);
+    addTag('REQ-003', 'backend', tmpDir);
+
+    const frontendReqs = findByTag('frontend', tmpDir);
+    expect(frontendReqs).toHaveLength(2);
+    expect(frontendReqs.map((r) => r.id)).toEqual(['REQ-001', 'REQ-002']);
+
+    const backendReqs = findByTag('backend', tmpDir);
+    expect(backendReqs).toHaveLength(1);
+    expect(backendReqs[0].id).toBe('REQ-003');
+  });
+
+  it('findByTag is case insensitive', () => {
+    addTag('REQ-001', 'frontend', tmpDir);
+    const results = findByTag('FrontEnd', tmpDir);
+    expect(results).toHaveLength(1);
   });
 });

@@ -218,3 +218,92 @@ export function removeDependency(id: string, depId: string, cwd?: string): Requi
   writeRequirements(data, cwd);
   return req;
 }
+
+export function searchRequirements(keyword: string, cwd?: string): Requirement[] {
+  const data = readRequirements(cwd);
+  const lowerKeyword = keyword.toLowerCase();
+
+  return data.requirements.filter((req) => {
+    // Exact ID match
+    if (req.id.toLowerCase() === lowerKeyword) return true;
+    // Title contains
+    if (req.title.toLowerCase().includes(lowerKeyword)) return true;
+    // Description contains
+    if (req.description.toLowerCase().includes(lowerKeyword)) return true;
+    // Notes contain
+    if (req.notes && req.notes.some((n) => n.content.toLowerCase().includes(lowerKeyword))) {
+      return true;
+    }
+    return false;
+  });
+}
+
+export function addTag(id: string, tag: string, cwd?: string): Requirement {
+  const data = readRequirements(cwd);
+  const req = data.requirements.find((r) => r.id === id);
+  if (!req) throw new Error(`Requirement ${id} not found`);
+  if (!req.tags) req.tags = [];
+  const normalizedTag = tag.toLowerCase().trim();
+  if (req.tags.includes(normalizedTag)) return req;
+  req.tags.push(normalizedTag);
+  writeRequirements(data, cwd);
+  return req;
+}
+
+export function removeTag(id: string, tag: string, cwd?: string): Requirement {
+  const data = readRequirements(cwd);
+  const req = data.requirements.find((r) => r.id === id);
+  if (!req) throw new Error(`Requirement ${id} not found`);
+  if (!req.tags) throw new Error(`${id} has no tags`);
+  const normalizedTag = tag.toLowerCase().trim();
+  const idx = req.tags.indexOf(normalizedTag);
+  if (idx === -1) throw new Error(`${id} does not have tag "${tag}"`);
+  req.tags.splice(idx, 1);
+  if (req.tags.length === 0) delete req.tags;
+  writeRequirements(data, cwd);
+  return req;
+}
+
+export function getTags(cwd?: string): Map<string, number> {
+  const data = readRequirements(cwd);
+  const tagCounts = new Map<string, number>();
+  for (const req of data.requirements) {
+    if (req.tags) {
+      for (const tag of req.tags) {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      }
+    }
+  }
+  return tagCounts;
+}
+
+export function findByTag(tag: string, cwd?: string): Requirement[] {
+  const data = readRequirements(cwd);
+  const normalizedTag = tag.toLowerCase().trim();
+  return data.requirements.filter((req) => req.tags?.includes(normalizedTag));
+}
+
+export function addRequirementFromTemplate(
+  title: string,
+  description: string,
+  priority: RequirementPriority,
+  tags: string[],
+  acceptance: Array<{ criterion: string; done: boolean }>,
+  cwd?: string
+): Requirement {
+  const data = readRequirements(cwd);
+  const req: Requirement = {
+    id: getNextReqId(data),
+    title,
+    description,
+    status: 'draft',
+    priority,
+    created: new Date().toISOString().split('T')[0],
+    tags,
+    files: [],
+    acceptance,
+  };
+  data.requirements.push(req);
+  writeRequirements(data, cwd);
+  return req;
+}

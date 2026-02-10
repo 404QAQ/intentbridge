@@ -9,6 +9,9 @@ const END_MARKER = '<!-- INTENTBRIDGE:END -->';
 
 function renderRequirement(lines: string[], r: Requirement): void {
   lines.push(`### ${r.id} [${r.status}] ${r.title}`);
+  if (r.tags && r.tags.length > 0) {
+    lines.push(`标签: ${r.tags.join(', ')}`);
+  }
   if (r.depends_on && r.depends_on.length > 0) {
     lines.push(`依赖: ${r.depends_on.join(', ')}`);
   }
@@ -72,6 +75,19 @@ export function generateBlock(project: ProjectConfig, requirements: Requirements
     lines.push('## 项目约定');
     for (const c of project.project.conventions) {
       lines.push(`- ${c}`);
+    }
+    lines.push('');
+  }
+
+  // Milestones
+  if (requirements.milestones && requirements.milestones.length > 0) {
+    lines.push('## 里程碑');
+    for (const milestone of requirements.milestones) {
+      const statusIcon =
+        milestone.status === 'completed' ? '✓' :
+        milestone.status === 'active' ? '▶' :
+        '☐';
+      lines.push(`- ${statusIcon} ${milestone.name} (${milestone.requirements.length} 个需求)${milestone.due_date ? ` — 📅 ${milestone.due_date}` : ''}`);
     }
     lines.push('');
   }

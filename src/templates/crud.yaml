@@ -1,0 +1,14 @@
+title: "CRUD {资源名}"
+description: "实现 {资源名} 的增删改查功能"
+tags: ["backend", "database"]
+acceptance:
+  - criterion: "创建 {资源名} 接口"
+    done: false
+  - criterion: "查询列表 {资源名} 接口"
+    done: false
+  - criterion: "查询单个 {资源名} 接口"
+    done: false
+  - criterion: "更新 {资源名} 接口"
+    done: false
+  - criterion: "删除 {资源名} 接口"
+    done: false

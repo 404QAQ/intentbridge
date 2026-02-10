@@ -2,8 +2,16 @@
 
 import { Command } from 'commander';
 import { initCommand } from '../src/commands/init.js';
-import { reqAddCommand, reqListCommand, reqUpdateCommand, reqDoneCommand, reqRemoveCommand, reqNoteCommand, reqNotesCommand, reqAcCommand, reqAcceptCommand, reqAcListCommand, reqDepCommand, reqUndepCommand, reqDepsCommand } from '../src/commands/req.js';
+import { reqAddCommand, reqListCommand, reqUpdateCommand, reqDoneCommand, reqRemoveCommand, reqNoteCommand, reqNotesCommand, reqAcCommand, reqAcceptCommand, reqAcListCommand, reqDepCommand, reqUndepCommand, reqDepsCommand, reqSearchCommand, reqTagCommand, reqUntagCommand, reqTagsCommand, reqExportCommand, reqTemplatesCommand } from '../src/commands/req.js';
 import { mapAddCommand, mapRemoveCommand, mapListCommand, mapWhichCommand } from '../src/commands/map.js';
+import {
+  milestoneCreateCommand,
+  milestoneRemoveCommand,
+  milestoneAddCommand,
+  milestoneRemoveReqCommand,
+  milestoneStatusCommand,
+  milestoneListCommand,
+} from '../src/commands/milestone.js';
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 import { syncCommand } from '../src/commands/sync.js';
@@ -36,9 +44,10 @@ const req = program
 req
   .command('add')
   .description('Add a new requirement')
-  .action(async () => {
+  .option('-t, --template <name>', 'Use a template')
+  .action(async (options: { template?: string }) => {
     try {
-      await reqAddCommand();
+      await reqAddCommand(options.template);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
@@ -192,6 +201,81 @@ req
     }
   });
 
+req
+  .command('search <keyword>')
+  .description('Search requirements by keyword')
+  .action((keyword: string) => {
+    try {
+      reqSearchCommand(keyword);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('tag <id> <tag>')
+  .description('Add a tag to a requirement')
+  .action((id: string, tag: string) => {
+    try {
+      reqTagCommand(id, tag);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('untag <id> <tag>')
+  .description('Remove a tag from a requirement')
+  .action((id: string, tag: string) => {
+    try {
+      reqUntagCommand(id, tag);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('tags')
+  .description('List all tags')
+  .action(() => {
+    try {
+      reqTagsCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('export')
+  .description('Export requirements')
+  .option('-f, --format <format>', 'Output format (markdown|json)', 'markdown')
+  .option('-o, --output <file>', 'Output file (prints to stdout if not specified)')
+  .action((options: { format: string; output?: string }) => {
+    try {
+      const format = options.format === 'json' ? 'json' : 'markdown';
+      reqExportCommand(format, options.output);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('templates')
+  .description('List available templates')
+  .action(() => {
+    try {
+      reqTemplatesCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
 // ib map
 const map = program
   .command('map')
@@ -239,6 +323,83 @@ map
   .action((file: string) => {
     try {
       mapWhichCommand(file);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib milestone
+const milestone = program
+  .command('milestone')
+  .description('Manage milestones');
+
+milestone
+  .command('create [name] [dueDate]')
+  .description('Create a new milestone')
+  .action(async (name?: string, dueDate?: string) => {
+    try {
+      await milestoneCreateCommand(name, dueDate);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+milestone
+  .command('remove <name>')
+  .description('Remove a milestone')
+  .action((name: string) => {
+    try {
+      milestoneRemoveCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+milestone
+  .command('add <name> <reqId>')
+  .description('Add a requirement to a milestone')
+  .action((name: string, reqId: string) => {
+    try {
+      milestoneAddCommand(name, reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+milestone
+  .command('remove-req <name> <reqId>')
+  .description('Remove a requirement from a milestone')
+  .action((name: string, reqId: string) => {
+    try {
+      milestoneRemoveReqCommand(name, reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+milestone
+  .command('status <name> <status>')
+  .description('Set milestone status (planned/active/completed)')
+  .action((name: string, status: string) => {
+    try {
+      milestoneStatusCommand(name, status);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+milestone
+  .command('list')
+  .description('List all milestones')
+  .action(() => {
+    try {
+      milestoneListCommand();
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);

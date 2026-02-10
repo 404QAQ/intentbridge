@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { writeProject, writeRequirements, addRequirement, addFileMapping, updateRequirement } from '../src/services/store.js';
+import { writeProject, writeRequirements, addRequirement, addFileMapping, updateRequirement, addTag } from '../src/services/store.js';
 import type { ProjectConfig } from '../src/models/types.js';
 
 const CLI = resolve(import.meta.dirname, '..', 'bin', 'ib.ts');
@@ -269,5 +269,72 @@ describe('ib status', () => {
     expect(out).toContain('test-proj');
     expect(out).toContain('Active');
     expect(out).toContain('Done');
+  });
+});
+
+describe('ib req tag', () => {
+  beforeEach(() => {
+    initProject();
+    addRequirement('Feature', 'Desc', 'medium', cwd);
+  });
+
+  it('adds a tag to a requirement', () => {
+    const out = run('req tag REQ-001 frontend');
+    expect(out).toContain('Added tag');
+    expect(out).toContain('REQ-001');
+    expect(out).toContain('frontend');
+  });
+
+  it('normalizes tag to lowercase', () => {
+    const out = run('req tag REQ-001 FrontEnd');
+    expect(out).toContain('frontend');
+  });
+
+  it('removes a tag from a requirement', () => {
+    run('req tag REQ-001 frontend');
+    const out = run('req untag REQ-001 frontend');
+    expect(out).toContain('Removed tag');
+    expect(out).toContain('frontend');
+  });
+
+  it('lists all tags', () => {
+    addRequirement('Feature 2', 'Desc', 'low', cwd);
+    run('req tag REQ-001 frontend');
+    run('req tag REQ-001 backend');
+    run('req tag REQ-002 frontend');
+
+    const out = run('req tags');
+    expect(out).toContain('All tags');
+    expect(out).toContain('frontend');
+    expect(out).toContain('backend');
+    expect(out).toContain('(2)'); // frontend count
+  });
+
+  it('shows empty message when no tags', () => {
+    const out = run('req tags');
+    expect(out).toContain('No tags');
+  });
+});
+
+describe('ib req search', () => {
+  beforeEach(() => {
+    initProject();
+    addRequirement('User Authentication', 'Implement JWT', 'high', cwd);
+    addRequirement('User Profile', 'Profile management', 'medium', cwd);
+    addRequirement('API Docs', 'Document endpoints', 'low', cwd);
+  });
+
+  it('searches requirements by keyword', () => {
+    const out = run('req search user');
+    expect(out).toContain('Found 2 requirements');
+    expect(out).toContain('REQ-001');
+    expect(out).toContain('User Authentication');
+    expect(out).toContain('REQ-002');
+    expect(out).toContain('User Profile');
+  });
+
+  it('shows no results message', () => {
+    const out = run('req search nonexistent');
+    expect(out).toContain('No requirements found');
   });
 });

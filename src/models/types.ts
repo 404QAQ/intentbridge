@@ -11,6 +11,13 @@ export interface ProjectConfig {
 export type RequirementStatus = 'draft' | 'active' | 'implementing' | 'done';
 export type RequirementPriority = 'high' | 'medium' | 'low';
 
+export interface Milestone {
+  name: string;
+  requirements: string[];
+  status?: 'planned' | 'active' | 'completed';
+  due_date?: string;
+}
+
 export interface Requirement {
   id: string;
   title: string;
@@ -22,8 +29,10 @@ export interface Requirement {
   notes?: Array<{ date: string; content: string }>;
   acceptance?: Array<{ criterion: string; done: boolean }>;
   depends_on?: string[];
+  tags?: string[];
 }
 
 export interface RequirementsData {
   requirements: Requirement[];
+  milestones?: Milestone[];
 }
