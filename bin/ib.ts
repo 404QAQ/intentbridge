@@ -12,6 +12,14 @@ import {
   milestoneStatusCommand,
   milestoneListCommand,
 } from '../src/commands/milestone.js';
+import {
+  explainCommand,
+  genUnderstandingCommand,
+  showUnderstandingCommand,
+  anchorAddCommand,
+  anchorRemoveCommand,
+  anchorListCommand,
+} from '../src/commands/explain.js';
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 import { syncCommand } from '../src/commands/sync.js';
@@ -400,6 +408,87 @@ milestone
   .action(() => {
     try {
       milestoneListCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib explain
+program
+  .command('explain <reqId>')
+  .description('Explain a requirement (compact output for Claude Code)')
+  .option('-f, --format <format>', 'Output format (text|json)', 'text')
+  .action((reqId: string, options: { format?: 'text' | 'json' }) => {
+    try {
+      explainCommand(reqId, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib gen-understanding
+program
+  .command('gen-understanding [reqId]')
+  .description('Generate understanding documents')
+  .action((reqId?: string) => {
+    try {
+      genUnderstandingCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib show-understanding
+program
+  .command('show-understanding <reqId>')
+  .description('Show detailed understanding document')
+  .action((reqId: string) => {
+    try {
+      showUnderstandingCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib anchor
+const anchor = program
+  .command('anchor')
+  .description('Manage code anchors');
+
+anchor
+  .command('add <reqId> <file>')
+  .description('Inject understanding anchor into code file')
+  .action((reqId: string, file: string) => {
+    try {
+      anchorAddCommand(reqId, file);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+anchor
+  .command('remove <file>')
+  .description('Remove anchor from code file')
+  .action((file: string) => {
+    try {
+      anchorRemoveCommand(file);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+anchor
+  .command('list [reqId]')
+  .description('List code anchors')
+  .action((reqId?: string) => {
+    try {
+      anchorListCommand(reqId);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
