@@ -1,0 +1,29 @@
+# Source files
+src/
+bin/
+tests/
+
+# Configuration
+tsconfig.json
+jest.config.cjs
+.project-context/
+
+# Development
+.git/
+.gitignore
+.eslintrc*
+.prettierrc*
+
+# Documentation (keep only README, LICENSE, CHANGELOG)
+docs/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Misc
+.DS_Store
+*.log
+*.tgz
+.env
+.env.*
