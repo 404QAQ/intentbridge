@@ -12,6 +12,10 @@ import {
   getProjectYamlPath,
   getRequirementsYamlPath,
 } from '../utils/paths.js';
+import {
+  trackChange,
+  findChanges,
+} from './version-control.js';
 
 export function isInitialized(cwd?: string): boolean {
   return existsSync(getIntentBridgeDir(cwd));
@@ -100,10 +104,22 @@ export function updateRequirement(
   const data = readRequirements(cwd);
   const req = data.requirements.find((r) => r.id === id);
   if (!req) throw new Error(`Requirement ${id} not found`);
+
+  // Track changes
+  const oldReq = { ...req };
+
   if (updates.title !== undefined) req.title = updates.title;
   if (updates.description !== undefined) req.description = updates.description;
   if (updates.status !== undefined) req.status = updates.status;
   if (updates.priority !== undefined) req.priority = updates.priority;
+
+  // Find and track changes
+  const changes = findChanges(oldReq, req);
+  if (changes.length > 0) {
+    const changeDescriptions = changes.map(c => `${c.field}: ${JSON.stringify(c.from)} → ${JSON.stringify(c.to)}`);
+    trackChange(id, changes, changeDescriptions.join('; '), cwd);
+  }
+
   writeRequirements(data, cwd);
   return req;
 }

@@ -2,7 +2,35 @@
 
 import { Command } from 'commander';
 import { initCommand } from '../src/commands/init.js';
-import { reqAddCommand, reqListCommand, reqUpdateCommand, reqDoneCommand, reqRemoveCommand, reqNoteCommand, reqNotesCommand, reqAcCommand, reqAcceptCommand, reqAcListCommand, reqDepCommand, reqUndepCommand, reqDepsCommand, reqSearchCommand, reqTagCommand, reqUntagCommand, reqTagsCommand, reqExportCommand, reqTemplatesCommand } from '../src/commands/req.js';
+import {
+  reqAddCommand,
+  reqListCommand,
+  reqUpdateCommand,
+  reqDoneCommand,
+  reqRemoveCommand,
+  reqNoteCommand,
+  reqNotesCommand,
+  reqAcCommand,
+  reqAcceptCommand,
+  reqAcListCommand,
+  reqDepCommand,
+  reqUndepCommand,
+  reqDepsCommand,
+  reqSearchCommand,
+  reqTagCommand,
+  reqUntagCommand,
+  reqTagsCommand,
+  reqExportCommand,
+  reqTemplatesCommand,
+} from '../src/commands/req.js';
+import {
+  reqHistoryCommand,
+  reqDiffCommand,
+  reqDiffLastCommand,
+  reqRollbackCommand,
+  reqSnapshotCommand,
+  reqSnapshotsCommand,
+} from '../src/commands/version.js';
 import { mapAddCommand, mapRemoveCommand, mapListCommand, mapWhichCommand } from '../src/commands/map.js';
 import {
   milestoneCreateCommand,
@@ -311,6 +339,82 @@ req
   .action(() => {
     try {
       reqTemplatesCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// Version control commands
+req
+  .command('history <req-id>')
+  .description('Show version history for a requirement')
+  .option('-o, --oneline', 'Show one line per version')
+  .action((reqId: string, options: { oneline?: boolean }) => {
+    try {
+      reqHistoryCommand(reqId, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('diff <req-id> <from> <to>')
+  .description('Compare two versions of a requirement')
+  .action((reqId: string, from: string, to: string) => {
+    try {
+      reqDiffCommand(reqId, from, to);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('diff-last <req-id>')
+  .description('Compare last two versions')
+  .action((reqId: string) => {
+    try {
+      reqDiffLastCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('rollback <req-id> <version>')
+  .description('Rollback requirement to a specific version')
+  .option('-d, --dry-run', 'Preview rollback without making changes')
+  .action(async (reqId: string, version: string, options: { dryRun?: boolean }) => {
+    try {
+      await reqRollbackCommand(reqId, version, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('snapshot <req-id> <tag>')
+  .description('Create a snapshot for a requirement')
+  .option('-m, --message <message>', 'Snapshot message')
+  .action(async (reqId: string, tag: string, options: { message?: string }) => {
+    try {
+      await reqSnapshotCommand(reqId, tag, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('snapshots <req-id>')
+  .description('List all snapshots for a requirement')
+  .action((reqId: string) => {
+    try {
+      reqSnapshotsCommand(reqId);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
