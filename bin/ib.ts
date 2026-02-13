@@ -20,6 +20,15 @@ import {
   anchorRemoveCommand,
   anchorListCommand,
 } from '../src/commands/explain.js';
+import {
+  aiConfigCommand,
+  aiUnderstandCommand,
+  analyzeImpactCommand,
+  validateCommand,
+  mcpStatusCommand,
+  mcpExportCommand,
+  mcpCleanupCommand,
+} from '../src/commands/ai.js';
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 import { syncCommand } from '../src/commands/sync.js';
@@ -489,6 +498,103 @@ anchor
   .action((reqId?: string) => {
     try {
       anchorListCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib ai
+const ai = program
+  .command('ai')
+  .description('AI-powered understanding and validation');
+
+ai
+  .command('config')
+  .description('Configure AI provider')
+  .action(async () => {
+    try {
+      await aiConfigCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+ai
+  .command('understand [reqId]')
+  .description('Generate AI-powered understanding')
+  .action(async (reqId?: string) => {
+    try {
+      await aiUnderstandCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+ai
+  .command('validate <reqId>')
+  .description('Validate requirement completion')
+  .option('-c, --with-code', 'Include code analysis')
+  .action(async (reqId: string, options: { withCode?: boolean }) => {
+    try {
+      await validateCommand(reqId, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib analyze
+program
+  .command('analyze-impact <reqId>')
+  .description('Analyze change impact for a requirement')
+  .option('-s, --change-status <status>', 'Simulate status change')
+  .action(async (reqId: string, options: { changeStatus?: string }) => {
+    try {
+      await analyzeImpactCommand(reqId, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib mcp
+const mcp = program
+  .command('mcp')
+  .description('MCP bridge management');
+
+mcp
+  .command('status')
+  .description('Show MCP bridge status')
+  .action(() => {
+    try {
+      mcpStatusCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+mcp
+  .command('export <reqId>')
+  .description('Export context for Claude Code')
+  .action((reqId: string) => {
+    try {
+      mcpExportCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+mcp
+  .command('cleanup')
+  .description('Clean up expired sessions')
+  .action(() => {
+    try {
+      mcpCleanupCommand();
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
