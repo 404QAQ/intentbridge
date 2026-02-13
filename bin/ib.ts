@@ -61,8 +61,8 @@ const program = new Command();
 
 program
   .name('ib')
-  .description('IntentBridge — project context manager for Claude Code')
-  .version('1.1.0');
+  .description('IntentBridge — AI-powered requirement management for Claude Code')
+  .version('2.3.0');
 
 // ib init
 program
