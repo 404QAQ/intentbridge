@@ -42,6 +42,17 @@ import {
   shareFileCommand,
   listSharedCommand,
 } from '../src/commands/project.js';
+import {
+  detectCommand,
+  doCommand,
+  smartAddCommand,
+} from '../src/commands/smart.js';
+import {
+  startMCPServer,
+  stopMCPServer,
+  getMCPServerStatus,
+  getMCPToolsList,
+} from '../src/services/mcp-server.js';
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 import { syncCommand } from '../src/commands/sync.js';
@@ -826,6 +837,121 @@ program
   .action((project?: string) => {
     try {
       listSharedCommand(project);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib detect
+program
+  .command('detect')
+  .description('Detect current project based on working directory')
+  .action(() => {
+    try {
+      detectCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib do
+program
+  .command('do <prompt>')
+  .description('Execute natural language command')
+  .action(async (prompt: string) => {
+    try {
+      await doCommand(prompt);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib smart-add
+program
+  .command('smart-add <description>')
+  .description('Add requirement with AI analysis and auto-create project structure')
+  .action(async (description: string) => {
+    try {
+      await smartAddCommand(description);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib mcp-server
+const mcpServerCmd = program
+  .command('mcp-server')
+  .description('MCP server management');
+
+mcpServerCmd
+  .command('start')
+  .description('Start MCP server')
+  .option('-p, --port <port>', 'Port number', '9527')
+  .option('-h, --host <host>', 'Host', 'localhost')
+  .action(async (options: { port: string; host: string }) => {
+    try {
+      console.log('Starting MCP server...');
+      await startMCPServer({
+        port: parseInt(options.port),
+        host: options.host,
+      });
+      console.log('MCP server is running. Press Ctrl+C to stop.');
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+mcpServerCmd
+  .command('stop')
+  .description('Stop MCP server')
+  .action(async () => {
+    try {
+      await stopMCPServer();
+      console.log('MCP server stopped.');
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+mcpServerCmd
+  .command('status')
+  .description('Show MCP server status')
+  .action(() => {
+    try {
+      const status = getMCPServerStatus();
+      console.log('MCP Server Status:');
+      console.log(`  Running: ${status.running ? 'Yes' : 'No'}`);
+      if (status.config) {
+        console.log(`  Host: ${status.config.host}`);
+        console.log(`  Port: ${status.config.port}`);
+      }
+      if (status.timestamp) {
+        console.log(`  Last Update: ${status.timestamp}`);
+      }
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+mcpServerCmd
+  .command('tools')
+  .description('List available MCP tools')
+  .action(() => {
+    try {
+      const tools = getMCPToolsList();
+      console.log('Available MCP Tools:\n');
+      tools.forEach(tool => {
+        console.log(`  ${tool.name}`);
+        console.log(`    ${tool.description}`);
+        console.log('');
+      });
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
