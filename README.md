@@ -1,157 +1,550 @@
-# IntentBridge
+# 🌉 IntentBridge
 
-维护项目状态并自动生成 `CLAUDE.md` 的 CLI 工具，为 Claude Code 提供项目上下文注入。
+<div align="center">
 
-IntentBridge 跟踪项目需求、将源文件映射到需求，并生成结构化的 `CLAUDE.md` 文件，让 Claude Code 充分了解你的项目上下文。
+**AI-Powered Requirement Management for Claude Code**
 
-## 安装
+[![npm version](https://badge.fury.io/js/intentbridge.svg)](https://badge.fury.io/js/intentbridge)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/node/v/intentbridge.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+
+[Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [Examples](#-examples) • [Contributing](#-contributing)
+
+</div>
+
+---
+
+## 📖 Overview
+
+**IntentBridge** is an intelligent requirement management tool designed specifically for **Claude Code**. It bridges the gap between human requirements and AI understanding through progressive context building and AI-powered analysis.
+
+### Why IntentBridge?
+
+- 🧠 **Persistent Memory** - Requirements never lost, Claude always remembers
+- 📈 **Progressive Understanding** - From raw description to code implementation (L0→L4)
+- 🤖 **AI-Driven Analysis** - Auto-generate understanding, impact analysis, validation
+- 🌍 **Multi-Project Management** - Manage all projects from one place
+- 🔗 **MCP Integration** - Seamless integration with Claude Code via Model Context Protocol
+- 🎯 **Natural Language Interface** - Just describe what you want in plain language
+
+---
+
+## ✨ Features
+
+### 🎯 Core Capabilities
+
+| Feature | Description |
+|---------|-------------|
+| **Requirement Management** | Full CRUD operations, tags, acceptance criteria, dependencies |
+| **AI-Powered Understanding** | Generate deep understanding, impact analysis, completion validation |
+| **Multi-Project Support** | Register, switch, link, and share files across projects |
+| **Progressive Context** | L0 (Raw) → L1 (Standardized) → L2 (Structured) → L3 (AI-Enhanced) → L4 (Code-Anchored) |
+| **MCP Bridge** | Export context for Claude Code, session management |
+| **Natural Language Router** | `ib do "add user auth requirement"` - just describe what you want |
+| **Smart Project Creation** | AI analyzes requirements and auto-creates project structure |
+
+### 🚀 Key Innovations
+
+1. **Auto Project Detection** - Detects project context automatically based on directory
+2. **Natural Language Commands** - No need to memorize complex CLI syntax
+3. **AI Project Scaffolding** - One command creates complete project structure with docs
+4. **MCP Protocol** - Real bidirectional communication with Claude Code
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+
+- Node.js >= 18.0.0
+- npm or yarn
+
+### Install
 
 ```bash
 npm install -g intentbridge
 ```
 
-或通过 npx 直接使用：
+### Verify Installation
 
 ```bash
-npx intentbridge <command>
+ib --version
+# Output: 2.3.0
 ```
 
-## 快速开始
+---
+
+## 🎮 Quick Start
+
+### 1. Initialize a Project
 
 ```bash
-# 在项目目录中初始化
+mkdir my-project && cd my-project
+ib init
+```
+
+### 2. Add Your First Requirement
+
+**Option A: Interactive Mode**
+```bash
+ib req add
+> Title: User Authentication
+> Description: Implement JWT-based login
+> Priority: high
+✔ Created REQ-001
+```
+
+**Option B: Natural Language**
+```bash
+ib do "添加用户认证需求"
+```
+
+**Option C: AI-Powered (Recommended)**
+```bash
+ib smart-add "需要一个用户认证系统，支持 JWT 和 OAuth2.0"
+```
+
+AI will:
+- Analyze requirement
+- Create project structure (src/, tests/, docs/)
+- Generate README.md, package.json, tsconfig.json
+- Add requirement to IntentBridge
+
+### 3. View Requirements
+
+```bash
+ib req list
+ib explain REQ-001          # Compact view for Claude Code
+ib show-understanding REQ-001  # Detailed document
+```
+
+### 4. Work with Claude Code
+
+```bash
+# Export context for Claude Code
+ib mcp export REQ-001
+
+# Copy and paste into Claude Code conversation
+```
+
+### 5. Validate Completion
+
+```bash
+ib ai validate REQ-001 --with-code
+```
+
+---
+
+## 📚 Documentation
+
+### Core Commands
+
+#### Requirement Management
+
+```bash
+# Add requirement
+ib req add
+ib req add --template user-auth
+
+# List requirements
+ib req list
+ib req search "authentication"
+
+# Update requirement
+ib req update REQ-001 --status implementing
+ib req done REQ-001
+
+# Acceptance criteria
+ib req ac REQ-001 "User can login"
+ib req accept REQ-001 0
+
+# Dependencies
+ib req dep REQ-002 REQ-001  # REQ-002 depends on REQ-001
+```
+
+#### File Mapping
+
+```bash
+ib map add REQ-001 src/auth.ts src/middleware/auth.ts
+ib map list
+ib which src/auth.ts  # Find related requirements
+```
+
+#### Milestones
+
+```bash
+ib milestone create "v1.0 Release" "2024-12-31"
+ib milestone add "v1.0 Release" REQ-001
+ib milestone list
+```
+
+#### AI Features
+
+```bash
+# Configure AI (first time)
+ib ai config
+
+# Generate AI understanding
+ib ai understand REQ-001
+
+# Analyze impact
+ib analyze-impact REQ-001
+
+# Validate completion
+ib ai validate REQ-001 --with-code
+```
+
+#### Multi-Project Management
+
+```bash
+# Register projects
+ib project register --name "frontend" --tags "react"
+ib project register --name "backend" --tags "nodejs"
+
+# List projects
+ib project list
+
+# Switch projects
+ib project switch backend
+
+# Global views
+ib global-status        # All projects overview
+ib global-reqs         # All requirements across projects
+ib global-reqs --tag frontend
+```
+
+#### Natural Language Interface
+
+```bash
+ib do "在 project-a 添加用户认证需求"
+ib do "查看 project-b 的进度"
+ib do "更新 REQ-001 状态为 done"
+ib do "搜索认证相关需求"
+```
+
+#### Smart Analysis
+
+```bash
+ib smart-add "需要一个电商网站，支持商品浏览、购物车、订单管理"
+# AI creates:
+# - Project structure (src/, tests/, docs/)
+# - Configuration files (package.json, tsconfig.json)
+# - README.md
+# - Requirement REQ-XXX
+```
+
+#### MCP Integration
+
+```bash
+# Start MCP server
+ib mcp-server start --port 9527
+
+# View status
+ib mcp-server status
+
+# List available tools
+ib mcp-server tools
+
+# Export context (manual)
+ib mcp export REQ-001
+```
+
+#### Auto Detection
+
+```bash
+# Detect current project
+ib detect
+
+# Works from any subdirectory
+cd src/components
+ib detect  # Still recognizes the project
+```
+
+---
+
+## 💡 Examples
+
+### Example 1: New Project from Scratch
+
+```bash
+# 1. Create and initialize
+mkdir saas-app && cd saas-app
 ib init
 
-# 添加需求
-ib req add
+# 2. Smart create with AI
+ib smart-add "需要一个 SaaS 应用，支持用户注册、订阅管理、计费系统"
 
-# 将文件映射到需求
-ib map add REQ-001 src/auth.ts src/login.vue
+# AI creates:
+# ✓ src/models/User.ts
+# ✓ src/models/Subscription.ts
+# ✓ src/routes/auth.ts
+# ✓ src/routes/subscriptions.ts
+# ✓ package.json
+# ✓ tsconfig.json
+# ✓ README.md
+# ✓ Requirement REQ-001
 
-# 记录技术决策
-ib req note REQ-001 "认证方案确定用 JWT，原因是需要跨域"
+# 3. Continue adding requirements
+ib do "添加用户资料编辑功能"
+ib do "添加团队协作功能"
 
-# 添加验收条件
-ib req ac REQ-001 "JWT token 签发和验证"
+# 4. View all requirements
+ib req list
 
-# 生成/更新 CLAUDE.md（聚焦特定需求）
-ib gen --focus REQ-001
+# 5. Start implementing
+ib req update REQ-001 --status implementing
+ib map add REQ-001 src/user/UserService.ts
+
+# 6. Validate completion
+ib ai validate REQ-001 --with-code
 ```
 
-## 命令
-
-### `ib init`
-
-在当前目录初始化 IntentBridge。创建 `.intentbridge/` 目录（包含项目配置）和初始 `CLAUDE.md`。
-
-### `ib req`
-
-管理需求：
-
-| 子命令 | 说明 |
-|---|---|
-| `ib req add` | 添加新需求（交互式） |
-| `ib req list` | 按状态分组列出所有需求 |
-| `ib req update <id>` | 更新状态/标题/描述（`-s`、`-t`、`-d`） |
-| `ib req done <id>` | 标记需求为已完成 |
-| `ib req remove <id>` | 删除需求 |
-| `ib req note <id> <message>` | 添加决策记录（带时间戳） |
-| `ib req notes <id>` | 查看决策记录 |
-| `ib req ac <id> <criterion>` | 添加验收条件 |
-| `ib req accept <id> <index>` | 标记验收条件为已完成 |
-| `ib req ac-list <id>` | 查看验收条件列表 |
-| `ib req dep <id> <dep-id>` | 添加依赖关系 |
-| `ib req undep <id> <dep-id>` | 移除依赖关系 |
-| `ib req deps <id>` | 查看依赖列表 |
-
-状态流转：`draft` → `active` → `implementing` → `done`
-
-优先级：`high`、`medium`、`low`
-
-### `ib map`
-
-将源文件映射到需求：
-
-| 子命令 | 说明 |
-|---|---|
-| `ib map add <req-id> <files...>` | 将一个或多个文件映射到需求 |
-| `ib map remove <req-id> <file>` | 移除文件映射 |
-| `ib map list` | 列出所有文件映射 |
-| `ib map which <file>` | 反向查询：从文件查找关联需求（支持模糊匹配） |
-
-### `ib gen`
-
-生成或更新 `CLAUDE.md`，写入当前项目上下文。
+### Example 2: Multi-Project Workflow
 
 ```bash
-ib gen                          # 生成完整上下文
-ib gen --focus REQ-001          # 只注入指定需求
-ib gen --focus REQ-001,REQ-003  # 注入多个需求
+# Register all projects
+cd ~/projects/frontend
+ib project register --name "frontend" --tags "react,typescript"
+
+cd ~/projects/backend
+ib project register --name "backend" --tags "nodejs,express"
+
+cd ~/projects/mobile
+ib project register --name "mobile" --tags "react-native"
+
+# View global status
+ib global-status
+
+# Link related projects
+ib project link frontend backend
+
+# Share common utilities
+ib share-file backend "src/utils/validation.ts" "frontend"
+
+# View requirements across all projects
+ib global-reqs --status implementing
 ```
 
-`--focus` 模式会自动包含依赖链上的需求。生成后输出估算 token 数，超过 4000 时警告。
-
-生成的内容包括：
-
-- 项目概述和技术栈
-- 活跃/进行中的需求（含决策记录、验收条件、依赖关系）
-- 最近完成的需求
-- 代码映射索引（文件 → 需求）
-
-### `ib sync`
-
-检测文件映射中的过时条目（已删除或重命名的文件），交互确认后自动更新映射。
+### Example 3: Claude Code Integration
 
 ```bash
+# Method 1: MCP Server (Automated)
+ib mcp-server start
+
+# Claude Code can now directly call IntentBridge tools:
+# - add_requirement
+# - list_requirements
+# - get_requirement
+# - update_requirement_status
+
+# Method 2: Manual Export
+ib mcp export REQ-001
+# Copy output and paste into Claude Code
+
+# Claude Code sees:
+# - Requirement details
+# - Understanding
+# - Related files
+# - Recent decisions
+# - Token budget
+```
+
+### Example 4: Change Impact Analysis
+
+```bash
+# Requirement needs to change
+ib analyze-impact REQ-001
+
+# Output:
+# Direct Dependencies: None
+# Transitive Dependencies: REQ-002, REQ-003
+# Affected Files: 5
+# Impact Depth: 2
+#
+# Recommendation: Continue in current session
+# Suggested Strategy: CONTINUE
+
+# If impact is large, export to new session:
+ib mcp export REQ-001
+# → Paste into new Claude Code session
+```
+
+---
+
+## 🏗️ Architecture
+
+### Progressive Understanding System
+
+```
+L0: Raw Requirement
+    ↓ "User Authentication"
+L1: Standardized
+    ↓ Tags, acceptance criteria, dependencies
+L2: Structured Understanding
+    ↓ Generated markdown document
+L3: AI-Enhanced
+    ↓ AI-generated analysis, suggestions
+L4: Code-Anchored
+    ↓ Comments injected into source files
+```
+
+### Context Flow
+
+```
+User Input
+    ↓
+[NLP Router] → Parse Intent
+    ↓
+[Project Detector] → Auto-detect context
+    ↓
+[Smart Analyzer] → AI analysis + structure creation
+    ↓
+[IntentBridge Store] → Persist requirements
+    ↓
+[MCP Bridge] → Export to Claude Code
+```
+
+---
+
+## 📊 Comparison
+
+| Feature | IntentBridge | Jira | Linear | Notion |
+|---------|--------------|------|--------|--------|
+| **AI-Powered Understanding** | ✅ | ❌ | ❌ | ❌ |
+| **Natural Language Interface** | ✅ | ❌ | ❌ | ❌ |
+| **Claude Code Integration** | ✅ | ❌ | ❌ | ❌ |
+| **Auto Project Scaffolding** | ✅ | ❌ | ❌ | ❌ |
+| **Progressive Context** | ✅ | ❌ | ❌ | ❌ |
+| **Offline-First** | ✅ | ❌ | ❌ | ✅ |
+| **Developer-Centric** | ✅ | ❌ | ✅ | ❌ |
+| **Free & Open Source** | ✅ | ❌ | ❌ | ✅ |
+
+---
+
+## 🛠️ Advanced Usage
+
+### Custom Templates
+
+Create custom requirement templates:
+
+```yaml
+# .intentbridge/templates/my-template.yaml
+title: ""
+description: ""
+priority: medium
+tags: []
+acceptance:
+  - criterion: ""
+    done: false
+```
+
+Use it:
+```bash
+ib req add --template my-template
+```
+
+### Git Hooks
+
+Auto-sync file mappings with git:
+
+```bash
+# .git/hooks/post-checkout
+#!/bin/sh
 ib sync
-# Found 2 mapping change(s):
-#   ✗ deleted  src/old-auth.ts
-#   → renamed  src/utils.ts → src/helpers.ts
-# Apply these changes? (y/N):
 ```
 
-### `ib status`
+### CI/CD Integration
 
-显示项目状态概览，包括需求统计和 `CLAUDE.md` 上下文体积（估算 token 数）。
+```yaml
+# .github/workflows/requirements.yml
+name: Validate Requirements
+on: [push]
 
-## 工作原理
-
-IntentBridge 将项目状态以 YAML 文件存储在 `.intentbridge/` 目录中：
-
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Validate
+        run: |
+          npm install -g intentbridge
+          ib validate --all --with-code
 ```
-.intentbridge/
-  project.yaml        # 项目名称、描述、技术栈、约定
-  requirements.yaml   # 所有需求（状态、优先级、文件映射）
-```
 
-运行 `ib gen` 会读取这些文件，在 `CLAUDE.md` 中生成结构化内容块，以 `<!-- INTENTBRIDGE:START -->` / `<!-- INTENTBRIDGE:END -->` 标记包裹。标记外的已有内容会被保留。
+---
 
-## 开发
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
 
 ```bash
-# 安装依赖
+git clone https://github.com/404QAQ/intentbridge.git
+cd intentbridge
 npm install
-
-# 开发模式运行
-npm run dev -- <command>
-
-# 运行测试
-npm test
-
-# 构建
 npm run build
+npm test
 ```
 
-## Docker
+### Run in Development
 
 ```bash
-# 在 Docker 中运行测试
-docker compose run test
-
-# 通过 Docker 使用 CLI
-docker compose run cli status
+npm run dev -- req list
 ```
 
-## 许可证
+---
 
-MIT
+## 📝 License
+
+MIT © [IntentBridge Team](https://github.com/404QAQ)
+
+---
+
+## 🆘 Support
+
+- 📖 [Documentation](https://intentbridge.dev)
+- 🐛 [Issue Tracker](https://github.com/404QAQ/intentbridge/issues)
+- 💬 [Discussions](https://github.com/404QAQ/intentbridge/discussions)
+
+---
+
+## 🗺️ Roadmap
+
+### v2.4 (Current) - Quality & Release
+- ✅ Testing coverage >80%
+- ✅ Comprehensive documentation
+- ✅ npm stable release
+
+### v2.5 - Collaboration & Extension
+- 🔜 Requirement version control
+- 🔜 Web UI dashboard
+- 🔜 Plugin system
+- 🔜 Third-party integrations (Jira, GitHub)
+
+### v2.6+ - Enterprise Features
+- 🔜 Team collaboration
+- 🔜 Advanced visualizations
+- 🔜 REST/GraphQL API
+- 🔜 Database backends
+
+See [Roadmap](https://github.com/404QAQ/intentbridge/projects) for full details.
+
+---
+
+## 🌟 Star History
+
+If you find IntentBridge useful, please consider giving it a star ⭐️!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=404QAQ/intentbridge&type=Date)](https://star-history.com/#404QAQ/intentbridge&Date)
+
+---
+
+<div align="center">
+
+**Built with ❤️ for Claude Code developers**
+
+[⬆ Back to Top](#-intentbridge)
+
+</div>
