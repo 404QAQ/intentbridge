@@ -3,3 +3,7 @@ dist/
 .intentbridge/
 *.tgz
 .env
+coverage/
+.nyc_output/
+*.log
+.DS_Store
