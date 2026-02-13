@@ -29,6 +29,19 @@ import {
   mcpExportCommand,
   mcpCleanupCommand,
 } from '../src/commands/ai.js';
+import {
+  projectRegisterCommand,
+  projectListCommand,
+  projectSwitchCommand,
+  projectUnlinkCommand,
+  projectLinkCommand,
+  projectStatusCommand,
+  projectSetStatusCommand,
+  globalStatusCommand,
+  globalReqsCommand,
+  shareFileCommand,
+  listSharedCommand,
+} from '../src/commands/project.js';
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 import { syncCommand } from '../src/commands/sync.js';
@@ -635,6 +648,184 @@ program
   .action(async () => {
     try {
       await syncCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project
+const project = program
+  .command('project')
+  .description('Manage multiple projects');
+
+project
+  .command('register [path]')
+  .description('Register a project')
+  .option('-n, --name <name>', 'Project name')
+  .option('-d, --description <desc>', 'Project description')
+  .option('-t, --tags <tags>', 'Comma-separated tags')
+  .option('-p, --priority <priority>', 'Priority (low/medium/high/critical)')
+  .action(async (path?: string, options?: any) => {
+    try {
+      await projectRegisterCommand(path, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('list')
+  .description('List all registered projects')
+  .action(() => {
+    try {
+      projectListCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('switch <name>')
+  .description('Switch to a project')
+  .action((name: string) => {
+    try {
+      projectSwitchCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('unlink <name>')
+  .description('Unregister a project')
+  .action((name: string) => {
+    try {
+      projectUnlinkCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('link <name> <projects...>')
+  .description('Link projects together')
+  .action((name: string, projects: string[]) => {
+    try {
+      projectLinkCommand(name, projects);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('status [name]')
+  .description('Show project status')
+  .action((name?: string) => {
+    try {
+      projectStatusCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('pause <name>')
+  .description('Pause a project')
+  .action((name: string) => {
+    try {
+      projectSetStatusCommand(name, 'paused');
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('archive <name>')
+  .description('Archive a project')
+  .action((name: string) => {
+    try {
+      projectSetStatusCommand(name, 'archived');
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+project
+  .command('activate <name>')
+  .description('Activate a project')
+  .action((name: string) => {
+    try {
+      projectSetStatusCommand(name, 'active');
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib global-status
+program
+  .command('global-status')
+  .description('Show global project overview')
+  .action(() => {
+    try {
+      globalStatusCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib global-reqs
+program
+  .command('global-reqs')
+  .description('View requirements across all projects')
+  .option('-t, --tag <tag>', 'Filter by tag')
+  .option('-s, --status <status>', 'Filter by status')
+  .option('-p, --priority <priority>', 'Filter by priority')
+  .action((options: { tag?: string; status?: string; priority?: string }) => {
+    try {
+      globalReqsCommand(options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib share-file
+program
+  .command('share-file <source-project> <file-path> <target-projects>')
+  .description('Share a file between projects')
+  .option('-s, --strategy <strategy>', 'Sync strategy (copy/symlink/reference)', 'reference')
+  .action((
+    sourceProject: string,
+    filePath: string,
+    targetProjects: string,
+    options: { strategy?: 'copy' | 'symlink' | 'reference' }
+  ) => {
+    try {
+      shareFileCommand(sourceProject, filePath, targetProjects, options.strategy);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib list-shared
+program
+  .command('list-shared [project]')
+  .description('List shared files')
+  .action((project?: string) => {
+    try {
+      listSharedCommand(project);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
