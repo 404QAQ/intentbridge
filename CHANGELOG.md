@@ -38,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced CLI with intelligent routing
 - Improved project context resolution
 
+### Fixed
+- Fix Jest dependency versions (29.x instead of non-existent 30.x)
+- Replace vitest with Jest across all test files
+- Fix test version expectations (2.3.0)
+- Fix test import paths and function names
+
 ### Technical
 - Added `src/services/version-control.ts` - Version control logic
 - Added `src/services/plugin-manager.ts` - Plugin management
