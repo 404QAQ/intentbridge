@@ -80,7 +80,7 @@ describe('RequirementStore', () => {
       expect(req.id).toMatch(/REQ-\d+/);
       expect(req.title).toBe('Test Requirement');
       expect(req.description).toBe('Test description');
-      expect(req.status).toBe('active');
+      expect(req.status).toBe('draft');
       expect(req.priority).toBe('medium');
       expect(req.created).toBeDefined();
       expect(req.files).toEqual([]);

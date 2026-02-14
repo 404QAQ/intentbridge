@@ -3,13 +3,38 @@ import {
   detectCurrentProject,
   findIntentBridgeDir,
   resolveProjectContext,
-} from '../../src/services/project-detector';
-import {
-  createTestProject,
-  cleanupTestProject,
-} from '../helpers/test-utils';
+} from '../../../src/services/project-detector';
 import { join } from 'node:path';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, existsSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import yaml from 'js-yaml';
+
+function createTestProject(name: string): string {
+  const testDir = join(tmpdir(), `ib-test-${name}-${Date.now()}`);
+  const ibDir = join(testDir, '.intentbridge');
+
+  mkdirSync(ibDir, { recursive: true });
+
+  // Create project.yaml
+  const projectConfig = {
+    version: '1',
+    project: {
+      name: name,
+      description: 'Test project',
+      tech_stack: ['TypeScript'],
+      conventions: ['Use ESM'],
+    },
+  };
+  writeFileSync(join(ibDir, 'project.yaml'), yaml.dump(projectConfig), 'utf-8');
+
+  return testDir;
+}
+
+function cleanupTestProject(testDir: string): void {
+  if (existsSync(testDir)) {
+    rmSync(testDir, { recursive: true, force: true });
+  }
+}
 
 describe('ProjectDetector', () => {
   let testProjectDir: string;

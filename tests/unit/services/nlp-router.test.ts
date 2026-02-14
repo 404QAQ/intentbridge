@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import {
   parseUserIntent,
   validateIntent,
-} from '../../src/services/nlp-router';
+} from '../../../src/services/nlp-router';
 
 describe('NLP Router', () => {
   describe('parseUserIntent (rule-based)', () => {
