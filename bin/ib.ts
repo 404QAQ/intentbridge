@@ -93,13 +93,19 @@ import {
   pluginListCommand,
   pluginInfoCommand,
 } from '../src/commands/plugin.js';
+import {
+  batchUpdateCommand,
+  batchTagCommand,
+  batchDoneCommand,
+  batchMapCommand,
+} from '../src/commands/batch.js';
 
 const program = new Command();
 
 program
   .name('ib')
   .description('IntentBridge — AI-powered requirement management for Claude Code')
-  .version('2.3.0');
+  .version('2.4.0');
 
 // ib init
 program
@@ -424,6 +430,116 @@ req
   .action((reqId: string) => {
     try {
       reqSnapshotsCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// Batch operations
+const batch = program
+  .command('batch')
+  .description('Batch operations on requirements');
+
+batch
+  .command('update <pattern-or-ids>')
+  .description('Batch update requirements (supports patterns like REQ-{001..010})')
+  .option('-s, --status <status>', 'Update status')
+  .option('-p, --priority <priority>', 'Update priority')
+  .option('-t, --title <title>', 'Update title')
+  .option('--dry-run', 'Preview changes without applying')
+  .option('-i, --interactive', 'Select requirements interactively')
+  .option('--status-filter <status>', 'Filter by status')
+  .option('--priority-filter <priority>', 'Filter by priority')
+  .option('--tag-filter <tag>', 'Filter by tag')
+  .action(async (patternOrIds: string, options: any) => {
+    try {
+      await batchUpdateCommand(
+        patternOrIds,
+        {
+          status: options.status as any,
+          priority: options.priority as any,
+          title: options.title,
+        },
+        {
+          dryRun: options.dryRun,
+          interactive: options.interactive,
+          status: options.statusFilter,
+          priority: options.priorityFilter,
+          tag: options.tagFilter,
+        }
+      );
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+batch
+  .command('tag <pattern-or-ids> <tags...>')
+  .description('Batch add tags to requirements')
+  .option('--remove', 'Remove tags instead of adding')
+  .option('--dry-run', 'Preview changes without applying')
+  .option('-i, --interactive', 'Select requirements interactively')
+  .option('--status-filter <status>', 'Filter by status')
+  .option('--priority-filter <priority>', 'Filter by priority')
+  .option('--tag-filter <tag>', 'Filter by tag')
+  .action(async (patternOrIds: string, tags: string[], options: any) => {
+    try {
+      await batchTagCommand(patternOrIds, tags, {
+        dryRun: options.dryRun,
+        interactive: options.interactive,
+        remove: options.remove,
+        status: options.statusFilter,
+        priority: options.priorityFilter,
+        tag: options.tagFilter,
+      });
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+batch
+  .command('done <pattern-or-ids>')
+  .description('Batch mark requirements as done')
+  .option('--dry-run', 'Preview changes without applying')
+  .option('-i, --interactive', 'Select requirements interactively')
+  .option('--status-filter <status>', 'Filter by status (default: active)')
+  .option('--priority-filter <priority>', 'Filter by priority')
+  .option('--tag-filter <tag>', 'Filter by tag')
+  .action(async (patternOrIds: string, options: any) => {
+    try {
+      await batchDoneCommand(patternOrIds, {
+        dryRun: options.dryRun,
+        interactive: options.interactive,
+        status: options.statusFilter,
+        priority: options.priorityFilter,
+        tag: options.tagFilter,
+      });
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+batch
+  .command('map <pattern-or-ids> <files...>')
+  .description('Batch map files to requirements')
+  .option('--dry-run', 'Preview changes without applying')
+  .option('-i, --interactive', 'Select requirements interactively')
+  .option('--status-filter <status>', 'Filter by status')
+  .option('--priority-filter <priority>', 'Filter by priority')
+  .option('--tag-filter <tag>', 'Filter by tag')
+  .action(async (patternOrIds: string, files: string[], options: any) => {
+    try {
+      await batchMapCommand(patternOrIds, files, {
+        dryRun: options.dryRun,
+        interactive: options.interactive,
+        status: options.statusFilter,
+        priority: options.priorityFilter,
+        tag: options.tagFilter,
+      });
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);

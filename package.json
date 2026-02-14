@@ -1,6 +1,6 @@
 {
   "name": "intentbridge",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "AI-powered requirement management tool for Claude Code with natural language interface, MCP integration, and smart project scaffolding",
   "type": "module",
   "main": "dist/index.js",
@@ -60,10 +60,12 @@
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
+    "inquirer": "^13.2.2",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "@types/inquirer": "^9.0.9",
     "@types/jest": "^29.5.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
