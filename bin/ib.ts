@@ -100,6 +100,12 @@ import {
   batchMapCommand,
 } from '../src/commands/batch.js';
 import { advancedSearchCommand } from '../src/commands/search.js';
+import {
+  backupCreateCommand,
+  backupRestoreCommand,
+  backupListCommand,
+  backupPruneCommand,
+} from '../src/commands/backup.js';
 
 const program = new Command();
 
@@ -1236,6 +1242,64 @@ web
   .action(() => {
     try {
       webStopCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib backup
+const backup = program
+  .command('backup')
+  .description('Backup and restore operations');
+
+backup
+  .command('create')
+  .description('Create a backup')
+  .option('-o, --output <filename>', 'Output filename')
+  .option('--no-compress', 'Disable compression')
+  .action(async (options: { output?: string; compress?: boolean }) => {
+    try {
+      await backupCreateCommand(options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+backup
+  .command('restore <backup-file>')
+  .description('Restore from a backup')
+  .option('--dry-run', 'Preview restore without applying')
+  .action(async (backupFile: string, options: { dryRun?: boolean }) => {
+    try {
+      await backupRestoreCommand(backupFile, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+backup
+  .command('list')
+  .description('List all backups')
+  .action(() => {
+    try {
+      backupListCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+backup
+  .command('prune')
+  .description('Delete old backups')
+  .option('-k, --keep <number>', 'Keep last N backups')
+  .option('-d, --days <number>', 'Delete backups older than N days')
+  .action((options: { keep?: number; days?: number }) => {
+    try {
+      backupPruneCommand(options);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
