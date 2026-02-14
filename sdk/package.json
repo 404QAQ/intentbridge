@@ -1,0 +1,35 @@
+{
+  "name": "@intentbridge/sdk",
+  "version": "2.4.0",
+  "description": "Official JavaScript/TypeScript SDK for IntentBridge API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "intentbridge",
+    "sdk",
+    "api",
+    "requirement-management",
+    "claude-code"
+  ],
+  "author": "IntentBridge Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/404QAQ/intentbridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/404QAQ/intentbridge/issues"
+  },
+  "homepage": "https://github.com/404QAQ/intentbridge#readme",
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

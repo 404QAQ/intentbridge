@@ -1,0 +1,260 @@
+openapi: 3.0.0
+info:
+  title: IntentBridge API
+  description: AI-powered requirement management API for Claude Code
+  version: 2.4.0
+  contact:
+    name: IntentBridge Team
+    url: https://github.com/404QAQ/intentbridge
+
+servers:
+  - url: http://localhost:9528/api
+    description: Local development server
+
+paths:
+  /requirements:
+    get:
+      summary: List all requirements
+      tags: [Requirements]
+      parameters:
+        - name: project
+          in: query
+          schema:
+            type: string
+          description: Filter by project path
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requirements:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Requirement'
+
+  /requirements/{id}:
+    get:
+      summary: Get a requirement by ID
+      tags: [Requirements]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: REQ-001
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requirement:
+                    $ref: '#/components/schemas/Requirement'
+        '404':
+          description: Requirement not found
+
+  /requirements/{id}/status:
+    put:
+      summary: Update requirement status
+      tags: [Requirements]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [draft, active, implementing, done]
+      responses:
+        '200':
+          description: Status updated successfully
+        '404':
+          description: Requirement not found
+
+  /projects:
+    get:
+      summary: List all projects
+      tags: [Projects]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+
+  /projects/current:
+    get:
+      summary: Get current project
+      tags: [Projects]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project:
+                    $ref: '#/components/schemas/Project'
+
+  /global-status:
+    get:
+      summary: Get global statistics
+      tags: [Statistics]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalStatus'
+
+  /health:
+    get:
+      summary: Health check
+      tags: [System]
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  schemas:
+    Requirement:
+      type: object
+      required: [id, title, description, status, priority, created, files]
+      properties:
+        id:
+          type: string
+          example: REQ-001
+        title:
+          type: string
+          example: User Authentication
+        description:
+          type: string
+          example: Implement user login and registration
+        status:
+          type: string
+          enum: [draft, active, implementing, done]
+          example: active
+        priority:
+          type: string
+          enum: [high, medium, low]
+          example: high
+        created:
+          type: string
+          format: date-time
+        files:
+          type: array
+          items:
+            type: string
+          example: [src/auth/login.ts, src/auth/register.ts]
+        tags:
+          type: array
+          items:
+            type: string
+          example: [backend, security]
+        notes:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date-time
+              content:
+                type: string
+        acceptance:
+          type: array
+          items:
+            type: object
+            properties:
+              criterion:
+                type: string
+              done:
+                type: boolean
+        depends_on:
+          type: array
+          items:
+            type: string
+
+    Project:
+      type: object
+      required: [name, path, status]
+      properties:
+        name:
+          type: string
+          example: my-project
+        path:
+          type: string
+          example: /Users/user/projects/my-project
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, paused, archived]
+          example: active
+
+    GlobalStatus:
+      type: object
+      properties:
+        totalProjects:
+          type: integer
+          example: 5
+        activeProjects:
+          type: integer
+          example: 3
+        totalRequirements:
+          type: integer
+          example: 42
+        doneRequirements:
+          type: integer
+          example: 28
+        implementingRequirements:
+          type: integer
+          example: 8
+
+tags:
+  - name: Requirements
+    description: Requirement management operations
+  - name: Projects
+    description: Project management operations
+  - name: Statistics
+    description: Global statistics and analytics
+  - name: System
+    description: System health and status
