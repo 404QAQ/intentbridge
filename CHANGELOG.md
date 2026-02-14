@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Version history with diffs
   - Rollback capability
   - Snapshot creation with tags
+- **Plugin System** - Extensible plugin architecture
+  - Hook-based event system (12 hooks)
+  - Plugin lifecycle management
+  - 3 builtin plugins (auto-tagger, dependency-detector, notifier)
+  - Custom plugin development support
+  - Plugin CLI commands
 - **Auto Project Detection** - Automatically detect project context from directory
 - **Natural Language Interface** - `ib do "add user auth requirement"` - just describe what you want
 - **MCP Protocol Integration** - Real MCP server for Claude Code integration
@@ -26,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **NLP Router** - Natural language parsing with AI and rule-based fallback
 - **MCP Server** - TCP socket server with tool-based API
 - **Smart Analyzer** - AI-driven requirement analysis and scaffolding
-- New commands: `ib detect`, `ib do`, `ib smart-add`, `ib mcp-server start`, `ib web start`
+- New commands: `ib detect`, `ib do`, `ib smart-add`, `ib mcp-server start`, `ib web start`, `ib plugin install/uninstall/enable/disable/list/info`
 
 ### Changed
 - Enhanced CLI with intelligent routing
@@ -34,10 +40,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical
 - Added `src/services/version-control.ts` - Version control logic
+- Added `src/services/plugin-manager.ts` - Plugin management
+- Added `src/services/plugin-loader.ts` - Builtin plugin loader
+- Added `src/types/plugin.ts` - Plugin type definitions
 - Added `src/commands/version.ts` - Version commands
 - Added `src/commands/web.ts` - Web dashboard commands
+- Added `src/commands/plugin.ts` - Plugin commands
+- Added `src/plugins/builtin/` - Builtin plugins
 - Added `web/` - React frontend with Vite + TypeScript
 - Added `web-server/` - Express backend API server
+- Added `docs/PLUGINS.md` - Plugin development guide
 - Added `src/services/project-detector.ts`
 - Added `src/services/nlp-router.ts`
 - Added `src/services/mcp-server.ts`
