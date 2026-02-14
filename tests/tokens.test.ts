@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { estimateTokens, formatTokenWarning } from '../src/utils/tokens.js';
 
 describe('estimateTokens', () => {

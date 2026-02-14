@@ -1,13 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { writeProject, writeRequirements, addRequirement, addFileMapping, updateRequirement, addTag } from '../src/services/store.js';
-import type { ProjectConfig } from '../src/models/types.js';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { writeProject, writeRequirements, addRequirement, addFileMapping, updateRequirement, addTag } from '../src/services/store';
+import type { ProjectConfig } from '../src/models/types';
 
-const CLI = resolve(import.meta.dirname, '..', 'bin', 'ib.ts');
-const TSX = resolve(import.meta.dirname, '..', 'node_modules', '.bin', 'tsx');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const CLI = resolve(__dirname, '..', 'bin', 'ib.ts');
+const TSX = resolve(__dirname, '..', 'node_modules', '.bin', 'tsx');
 
 let cwd: string;
 
@@ -44,7 +47,7 @@ afterEach(() => {
 describe('ib --version', () => {
   it('prints version', () => {
     const out = run('--version');
-    expect(out.trim()).toBe('1.1.0');
+    expect(out.trim()).toBe('2.3.0');
   });
 });
 

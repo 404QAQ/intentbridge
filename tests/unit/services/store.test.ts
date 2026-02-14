@@ -3,12 +3,44 @@ import {
   readRequirements,
   addRequirement,
   updateRequirement,
-  deleteRequirement,
+  removeRequirement,
   addNote,
   addAcceptanceCriterion,
-} from '../../src/services/store';
-import { createTestProject, cleanupTestProject } from '../helpers/test-utils';
+} from '../../../src/services/store';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import yaml from 'js-yaml';
+
+function createTestProject(name: string): string {
+  const testDir = join(tmpdir(), `ib-test-${name}-${Date.now()}`);
+  const ibDir = join(testDir, '.intentbridge');
+
+  mkdirSync(ibDir, { recursive: true });
+
+  // Create project.yaml
+  const projectConfig = {
+    version: '1',
+    project: {
+      name: name,
+      description: 'Test project',
+      tech_stack: ['TypeScript'],
+      conventions: ['Use ESM'],
+    },
+  };
+  writeFileSync(join(ibDir, 'project.yaml'), yaml.dump(projectConfig), 'utf-8');
+
+  // Create requirements.yaml
+  writeFileSync(join(ibDir, 'requirements.yaml'), yaml.dump({ requirements: [] }), 'utf-8');
+
+  return testDir;
+}
+
+function cleanupTestProject(testDir: string): void {
+  if (existsSync(testDir)) {
+    rmSync(testDir, { recursive: true, force: true });
+  }
+}
 
 describe('RequirementStore', () => {
   let testProjectDir: string;
@@ -106,11 +138,11 @@ describe('RequirementStore', () => {
     });
   });
 
-  describe('deleteRequirement', () => {
+  describe('removeRequirement', () => {
     it('should delete requirement', () => {
       const req = addRequirement('To Delete', 'Desc', 'medium', testProjectDir);
 
-      deleteRequirement(req.id, testProjectDir);
+      removeRequirement(req.id, testProjectDir);
 
       const data = readRequirements(testProjectDir);
       expect(data.requirements).toHaveLength(0);
@@ -118,7 +150,7 @@ describe('RequirementStore', () => {
 
     it('should throw error if requirement not found', () => {
       expect(() => {
-        deleteRequirement('REQ-999', testProjectDir);
+        removeRequirement('REQ-999', testProjectDir);
       }).toThrow();
     });
   });
