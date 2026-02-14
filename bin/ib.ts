@@ -84,6 +84,7 @@ import {
 import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 import { syncCommand } from '../src/commands/sync.js';
+import { webStartCommand, webStopCommand } from '../src/commands/web.js';
 
 const program = new Command();
 
@@ -1056,6 +1057,37 @@ mcpServerCmd
         console.log(`    ${tool.description}`);
         console.log('');
       });
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib web
+const web = program
+  .command('web')
+  .description('Web Dashboard management');
+
+web
+  .command('start')
+  .description('Start web dashboard')
+  .option('-p, --port <port>', 'API server port', '9528')
+  .option('--no-dev', 'Start in production mode')
+  .action(async (options: { port?: string; dev?: boolean }) => {
+    try {
+      await webStartCommand(options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+web
+  .command('stop')
+  .description('Stop web dashboard')
+  .action(() => {
+    try {
+      webStopCommand();
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
