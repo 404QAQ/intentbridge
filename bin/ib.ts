@@ -113,6 +113,11 @@ import {
   templateShowCommand,
   templateDeleteCommand,
 } from '../src/commands/template.js';
+import { registerRequirementCommand } from '../src/commands/requirement.js';
+import { registerTaskCommand } from '../src/commands/task.js';
+import { registerExecuteCommand } from '../src/commands/execute.js';
+import { registerMCPToolsCommand } from '../src/commands/mcp-tools.js';
+import { registerValidateCommand } from '../src/commands/validate.js';
 
 const program = new Command();
 
@@ -1454,5 +1459,20 @@ plugin
       process.exit(1);
     }
   });
+
+// v3.0.0 新增：requirement 命令
+registerRequirementCommand(program);
+
+// v3.0.0 新增：task 命令
+registerTaskCommand(program);
+
+// v3.0.0 Phase 3 新增：execute 命令
+registerExecuteCommand(program);
+
+// v3.0.0 Phase 3.5 新增：mcp-tools 命令
+registerMCPToolsCommand(program);
+
+// v3.0.0 Phase 4 新增：validate 命令
+registerValidateCommand(program);
 
 program.parse();
