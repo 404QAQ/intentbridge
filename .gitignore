@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .intentbridge/
+.project-context/
 *.tgz
 .env
 coverage/

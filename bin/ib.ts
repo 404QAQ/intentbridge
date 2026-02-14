@@ -85,6 +85,14 @@ import { genCommand } from '../src/commands/gen.js';
 import { statusCommand } from '../src/commands/status.js';
 import { syncCommand } from '../src/commands/sync.js';
 import { webStartCommand, webStopCommand } from '../src/commands/web.js';
+import {
+  pluginInstallCommand,
+  pluginUninstallCommand,
+  pluginEnableCommand,
+  pluginDisableCommand,
+  pluginListCommand,
+  pluginInfoCommand,
+} from '../src/commands/plugin.js';
 
 const program = new Command();
 
@@ -1088,6 +1096,83 @@ web
   .action(() => {
     try {
       webStopCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib plugin
+const plugin = program
+  .command('plugin')
+  .description('Manage plugins');
+
+plugin
+  .command('install <path>')
+  .description('Install a plugin from file path')
+  .action(async (pluginPath: string) => {
+    try {
+      await pluginInstallCommand(pluginPath);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+plugin
+  .command('uninstall <name>')
+  .description('Uninstall a plugin')
+  .action(async (name: string) => {
+    try {
+      await pluginUninstallCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+plugin
+  .command('enable <name>')
+  .description('Enable a plugin')
+  .action(async (name: string) => {
+    try {
+      await pluginEnableCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+plugin
+  .command('disable <name>')
+  .description('Disable a plugin')
+  .action(async (name: string) => {
+    try {
+      await pluginDisableCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+plugin
+  .command('list')
+  .description('List installed plugins')
+  .action(() => {
+    try {
+      pluginListCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+plugin
+  .command('info <name>')
+  .description('Show plugin information')
+  .action((name: string) => {
+    try {
+      pluginInfoCommand(name);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
