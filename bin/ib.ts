@@ -99,6 +99,7 @@ import {
   batchDoneCommand,
   batchMapCommand,
 } from '../src/commands/batch.js';
+import { advancedSearchCommand } from '../src/commands/search.js';
 
 const program = new Command();
 
@@ -291,6 +292,29 @@ req
   .action((keyword: string) => {
     try {
       reqSearchCommand(keyword);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+req
+  .command('asearch <query>')
+  .description('Advanced search with filters (status:active priority:high tag:backend)')
+  .option('--regex', 'Use regex search')
+  .option('--fuzzy', 'Use fuzzy matching')
+  .option('-s, --sort-by <field>', 'Sort by (id/title/status/priority/created)')
+  .option('-o, --sort-order <order>', 'Sort order (asc/desc)', 'asc')
+  .option('-l, --limit <number>', 'Limit number of results')
+  .action((query: string, options: any) => {
+    try {
+      advancedSearchCommand(query, {
+        regex: options.regex,
+        fuzzy: options.fuzzy,
+        sortBy: options.sortBy,
+        sortOrder: options.sortOrder,
+        limit: options.limit ? parseInt(options.limit) : undefined,
+      });
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
