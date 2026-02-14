@@ -5,9 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.0] - 2024-02-13
+## [2.3.0] - 2024-02-14
 
 ### Added
+- **Web UI Dashboard** - Beautiful web-based dashboard for requirement management
+  - Dashboard with statistics and charts
+  - Requirements list with filtering
+  - Requirement detail view with status updates
+  - Real-time API integration
+- **Version Control System** - Complete requirement versioning
+  - Automatic change tracking
+  - Version history with diffs
+  - Rollback capability
+  - Snapshot creation with tags
 - **Auto Project Detection** - Automatically detect project context from directory
 - **Natural Language Interface** - `ib do "add user auth requirement"` - just describe what you want
 - **MCP Protocol Integration** - Real MCP server for Claude Code integration
@@ -16,13 +26,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **NLP Router** - Natural language parsing with AI and rule-based fallback
 - **MCP Server** - TCP socket server with tool-based API
 - **Smart Analyzer** - AI-driven requirement analysis and scaffolding
-- New commands: `ib detect`, `ib do`, `ib smart-add`, `ib mcp-server start`
+- New commands: `ib detect`, `ib do`, `ib smart-add`, `ib mcp-server start`, `ib web start`
 
 ### Changed
 - Enhanced CLI with intelligent routing
 - Improved project context resolution
 
 ### Technical
+- Added `src/services/version-control.ts` - Version control logic
+- Added `src/commands/version.ts` - Version commands
+- Added `src/commands/web.ts` - Web dashboard commands
+- Added `web/` - React frontend with Vite + TypeScript
+- Added `web-server/` - Express backend API server
 - Added `src/services/project-detector.ts`
 - Added `src/services/nlp-router.ts`
 - Added `src/services/mcp-server.ts`
