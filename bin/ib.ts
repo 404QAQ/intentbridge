@@ -106,6 +106,13 @@ import {
   backupListCommand,
   backupPruneCommand,
 } from '../src/commands/backup.js';
+import {
+  templateListCommand,
+  templateCreateCommand,
+  templateFromReqCommand,
+  templateShowCommand,
+  templateDeleteCommand,
+} from '../src/commands/template.js';
 
 const program = new Command();
 
@@ -384,6 +391,71 @@ req
   .action(() => {
     try {
       reqTemplatesCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib template
+const template = program
+  .command('template')
+  .description('Manage custom templates');
+
+template
+  .command('list')
+  .description('List custom templates')
+  .action(() => {
+    try {
+      templateListCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+template
+  .command('create [name]')
+  .description('Create a new template')
+  .action(async (name?: string) => {
+    try {
+      await templateCreateCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+template
+  .command('from-req [req-id]')
+  .description('Create template from existing requirement')
+  .action(async (reqId?: string) => {
+    try {
+      await templateFromReqCommand(reqId);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+template
+  .command('show <name>')
+  .description('Show template details')
+  .action((name: string) => {
+    try {
+      templateShowCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+template
+  .command('delete <name>')
+  .description('Delete a template')
+  .action(async (name: string) => {
+    try {
+      await templateDeleteCommand(name);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
