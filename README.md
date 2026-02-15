@@ -59,16 +59,33 @@
 
 ## 📦 Installation
 
-### Prerequisites
+### One-Line Install (Recommended)
 
-- Node.js >= 18.0.0
-- npm or yarn
+The fastest way to get started with IntentBridge:
 
-### Install
+```bash
+curl -fsSL https://raw.githubusercontent.com/404QAQ/intentbridge/main/install.sh | bash
+```
+
+**What the installer does:**
+- ✅ Checks and installs Node.js (v18+) if needed
+- ✅ Installs IntentBridge globally
+- ✅ Checks for Claude Code CLI (optional)
+- ✅ Configures Claude API key
+- ✅ Configures IntentBridge AI provider
+- ✅ Initializes your first project
+- ✅ Optionally starts the Web UI dashboard
+
+**Manual installation** (if you prefer):
 
 ```bash
 npm install -g intentbridge
 ```
+
+### Prerequisites
+
+- Node.js >= 18.0.0
+- npm or yarn
 
 ### Verify Installation
 

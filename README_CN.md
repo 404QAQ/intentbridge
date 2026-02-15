@@ -59,16 +59,33 @@
 
 ## 📦 安装
 
-### 前置要求
+### 一键安装（推荐）
 
-- Node.js >= 18.0.0
-- npm 或 yarn
+最快上手 IntentBridge 的方式：
 
-### 安装
+```bash
+curl -fsSL https://raw.githubusercontent.com/404QAQ/intentbridge/main/install.sh | bash
+```
+
+**安装脚本功能：**
+- ✅ 检查并安装 Node.js（v18+）
+- ✅ 全局安装 IntentBridge
+- ✅ 检查 Claude Code CLI（可选）
+- ✅ 配置 Claude API 密钥
+- ✅ 配置 IntentBridge AI 提供商
+- ✅ 初始化第一个项目
+- ✅ 可选启动 Web UI 仪表板
+
+**手动安装**（如果您喜欢）：
 
 ```bash
 npm install -g intentbridge
 ```
+
+### 前置要求
+
+- Node.js >= 18.0.0
+- npm 或 yarn
 
 ### 验证安装
 
