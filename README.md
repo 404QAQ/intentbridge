@@ -136,6 +136,42 @@ ib mcp export REQ-001
 ib ai validate REQ-001 --with-code
 ```
 
+### 6. Visualize with Web UI (NEW! 🎉)
+
+IntentBridge now includes a beautiful web-based dashboard for managing requirements:
+
+```bash
+# Start the web dashboard
+ib web start
+
+# Opens:
+# - Dashboard: http://localhost:3000
+# - API Server: http://localhost:9528
+```
+
+**Web UI Features:**
+- 🌙 **Dark Mode** - Automatic detection + manual toggle
+- 🔄 **Real-Time Updates** - Auto-refresh every 10 seconds
+- 🔍 **Advanced Filtering** - Search, status, priority, tags
+- 📤 **Export Options** - CSV, JSON, Markdown formats
+
+**Quick Tour:**
+
+```
+┌──────────────────────────────────────────────────┐
+│  Dashboard                    🌙 Toggle Theme   │
+│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐          │
+│  │ 12   │ │  5   │ │ 48   │ │ 75%  │          │
+│  │Projs │ │Active│ │ Reqs │ │ Done │          │
+│  └──────┘ └──────┘ └──────┘ └──────┘          │
+│                                                  │
+│  [Requirements] → Filter, Search, Export       │
+│  Click any requirement → View full details     │
+└──────────────────────────────────────────────────┘
+```
+
+See [Web UI Documentation](web/README.md) for detailed usage and screenshots.
+
 ---
 
 ## 📚 Documentation
@@ -514,22 +550,23 @@ MIT © [IntentBridge Team](https://github.com/404QAQ)
 
 ## 🗺️ Roadmap
 
-### v2.4 (Current) - Quality & Release
-- ✅ Testing coverage >80%
-- ✅ Comprehensive documentation
-- ✅ npm stable release
+### v3.1 (Current) - Web UI Enhancements
+- ✅ Dark mode support
+- ✅ Real-time updates (polling)
+- ✅ Advanced filtering
+- ✅ Multi-format export (CSV, JSON, Markdown)
 
-### v2.5 - Collaboration & Extension
+### v3.2 - Collaboration & Extension
 - 🔜 Requirement version control
-- 🔜 Web UI dashboard
 - 🔜 Plugin system
 - 🔜 Third-party integrations (Jira, GitHub)
+- 🔜 WebSocket-based real-time updates
 
-### v2.6+ - Enterprise Features
+### v3.3+ - Enterprise Features
 - 🔜 Team collaboration
-- 🔜 Advanced visualizations
+- 🔜 Advanced visualizations (Gantt charts, timeline view)
 - 🔜 REST/GraphQL API
-- 🔜 Database backends
+- 🔜 Database backends (PostgreSQL, MongoDB)
 
 See [Roadmap](https://github.com/404QAQ/intentbridge/projects) for full details.
 

@@ -58,6 +58,172 @@ This will start:
 
 Navigate to http://localhost:3000 to see your dashboard.
 
+## 📸 Screenshots & Visual Guide
+
+### Dashboard Overview
+
+The dashboard provides a comprehensive overview of your project status:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Dashboard                                     🌙/☀ Theme  │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐                  │
+│  │Total │  │Active│  │Total │  │Compl.│                  │
+│  │Projs │  │Projs │  │Reqs  │  │Rate  │                  │
+│  └──────┘  └──────┘  └──────┘  └──────┘                  │
+│                                                             │
+│  ┌────────────────┐  ┌────────────────────┐              │
+│  │ Status         │  │ Recent Requirements│              │
+│  │ Distribution   │  │                    │              │
+│  │  [Pie Chart]   │  │  • REQ-001         │              │
+│  │                │  │  • REQ-002         │              │
+│  │                │  │  • REQ-003         │              │
+│  └────────────────┘  └────────────────────┘              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Key Features:**
+- 📊 **Statistics Cards**: Quick view of project metrics
+- 🥧 **Pie Chart**: Visual status distribution
+- 📋 **Recent Requirements**: Latest requirement activity
+- 🌓 **Theme Toggle**: Switch between light and dark modes
+
+### Requirements List
+
+Browse and filter all your requirements with powerful controls:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Requirements                    [Filters] [Export ▼]      │
+│  Last updated: 10:30 PM          [Refresh]                 │
+├─────────────────────────────────────────────────────────────┤
+│  Showing 5 of 15 requirements                               │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ REQ-001  [implementing]  high                        │   │
+│  │ User Authentication                                   │   │
+│  │ Implement JWT-based login system...                  │   │
+│  │ Tags: [backend] [security]                           │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ REQ-002  [active]  medium                            │   │
+│  │ Password Reset                                       │   │
+│  │ Allow users to reset forgotten passwords...          │   │
+│  │ Tags: [backend] [email]                              │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Advanced Filtering:**
+
+Click the "Filters" button to expand the filter panel:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  🔍 Search: [_______________________]  [Clear All]         │
+│  📊 Status:   ○ All  ○ Draft  ○ Active  ○ Implementing  ○ Done │
+│  🎯 Priority: ○ All  ○ High   ○ Medium  ○ Low                │
+│  🏷️  Tags:    □ backend  □ frontend  □ database  □ security │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Filter Capabilities:**
+- 🔍 **Full-text Search**: Search titles, descriptions, and IDs
+- 📊 **Status Filter**: Filter by requirement status
+- 🎯 **Priority Filter**: Filter by priority level
+- 🏷️ **Tag Filter**: Multi-select tag filtering
+- 🧹 **Clear All**: Reset all filters instantly
+
+**Export Options:**
+
+Click the "Export" dropdown to download your data:
+
+```
+┌─────────────────┐
+│ 📄 Export as CSV │  ← Spreadsheet format
+│ 💻 Export as JSON│  ← Programmatic use
+│ 📝 Export as MD  │  ← Documentation
+└─────────────────┘
+```
+
+**Export Formats:**
+- 📊 **CSV**: Opens in Excel, Google Sheets
+- 💻 **JSON**: Perfect for scripts and automation
+- 📝 **Markdown**: Great for documentation and README files
+
+### Dark Mode
+
+IntentBridge supports both light and dark themes:
+
+**Light Mode:**
+- Clean, professional appearance
+- Optimal for daytime use
+- High contrast for readability
+
+**Dark Mode:**
+- Easy on the eyes
+- Perfect for nighttime coding
+- Reduces eye strain
+- Follows system preference by default
+
+Toggle between themes using the sun/moon icon in the header.
+
+### Real-Time Updates
+
+The interface automatically refreshes every 10 seconds:
+
+```
+Last updated: 10:30 PM  [Refresh]
+                  ↑
+        Click for manual refresh
+```
+
+**Features:**
+- ⏱️ **Auto-refresh**: Data updates every 10 seconds
+- 🕐 **Timestamp**: Shows when data was last updated
+- 🔄 **Manual Refresh**: Click to update immediately
+- ⚠️ **Error Handling**: Graceful display of connection issues
+
+### Requirement Details
+
+Click any requirement to view full details:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ← Back    REQ-001  [implementing]  HIGH priority          │
+│            User Authentication        [Status ▼]           │
+├─────────────────────────────────────────────────────────────┤
+│  Description                                                │
+│  ───────────                                                │
+│  Implement a secure JWT-based authentication system with    │
+│  role-based access control...                              │
+│                                                             │
+│  Acceptance Criteria                                        │
+│  ──────────────────                                         │
+│  ✓ User can login with email and password                  │
+│  ✓ Session expires after 24 hours                          │
+│  ☐ Password reset functionality                            │
+│                                                             │
+│  Dependencies                                               │
+│  ────────────                                               │
+│  • REQ-005: Database schema                                │
+│                                                             │
+│  Related Files                                              │
+│  ──────────────                                             │
+│  • src/auth/jwt.ts                                         │
+│  • src/middleware/auth.ts                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Detail View Features:**
+- 📝 **Full Description**: Complete requirement details
+- ✅ **Acceptance Criteria**: Track completion progress
+- 🔗 **Dependencies**: See related requirements
+- 📂 **Related Files**: View linked code files
+- 🔄 **Status Update**: Change status via dropdown
+
 ## Usage
 
 ### Dashboard
