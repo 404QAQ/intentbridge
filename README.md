@@ -41,6 +41,7 @@
 | **Requirement Management** | Full CRUD operations, tags, acceptance criteria, dependencies |
 | **AI-Powered Understanding** | Generate deep understanding, impact analysis, completion validation |
 | **Multi-Project Support** | Register, switch, link, and share files across projects |
+| **Multi-Project Coordination** | **NEW v3.4.0**: Port management, process monitoring, resource coordination |
 | **Progressive Context** | L0 (Raw) → L1 (Standardized) → L2 (Structured) → L3 (AI-Enhanced) → L4 (Code-Anchored) |
 | **MCP Bridge** | Export context for Claude Code, session management |
 | **Natural Language Router** | `ib do "add user auth requirement"` - just describe what you want |
@@ -52,6 +53,7 @@
 2. **Natural Language Commands** - No need to memorize complex CLI syntax
 3. **AI Project Scaffolding** - One command creates complete project structure with docs
 4. **MCP Protocol** - Real bidirectional communication with Claude Code
+5. **Multi-Project Coordination** - **NEW v3.4.0**: Manage ports, processes, and resources across multiple projects
 
 ---
 
@@ -72,7 +74,7 @@ npm install -g intentbridge
 
 ```bash
 ib --version
-# Output: 2.3.0
+# Output: 3.4.0
 ```
 
 ---
@@ -171,6 +173,55 @@ ib web start
 ```
 
 See [Web UI Documentation](web/README.md) for detailed usage and screenshots.
+
+### 7. Multi-Project Coordination (NEW! v3.4.0 🚀)
+
+IntentBridge v3.4.0 introduces comprehensive multi-project coordination capabilities:
+
+**Port Management:**
+```bash
+# Check for port conflicts across all projects
+ib project ports check
+
+# Find available ports automatically
+ib project ports find --range 3000-4000 --count 3
+
+# Assign ports to projects
+ib project ports assign my-project 8080
+```
+
+**Process Monitoring:**
+```bash
+# Start a project with monitoring
+ib project start my-project --auto-ports
+
+# View all running processes
+ib project ps
+
+# Check resource usage
+ib project resources my-project
+```
+
+**Real-time Dashboard:**
+```bash
+# View unified dashboard of all projects
+ib project dashboard
+
+# Shows:
+# - Running projects and their PIDs
+# - Port usage and conflicts
+# - CPU/Memory consumption
+# - Dependency graph
+```
+
+**Key Features:**
+- 🔄 **Automatic Port Allocation** - Find and assign ports automatically
+- 📊 **Resource Monitoring** - Track CPU/memory usage per project
+- 🔗 **Dependency Orchestration** - Start/stop projects in correct order
+- 🎯 **Conflict Prevention** - Detect and prevent port conflicts
+- 📈 **Real-time Dashboard** - Unified view of all projects
+
+See [Multi-Project Coordination Guide](docs/MULTI_PROJECT_COORDINATION.md) for complete documentation.
 
 ---
 
