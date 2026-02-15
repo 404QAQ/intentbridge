@@ -1,6 +1,10 @@
 import { spawn, ChildProcess } from 'child_process';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let webServerProcess: ChildProcess | null = null;
 let viteProcess: ChildProcess | null = null;
@@ -9,8 +13,8 @@ export async function webStartCommand(options: { port?: string; dev?: boolean })
   const port = options.port || '9528';
   const isDev = options.dev !== false; // Default to dev mode
 
-  const webServerPath = join(__dirname, '..', '..', 'web-server');
-  const webFrontendPath = join(__dirname, '..', '..', 'web');
+  const webServerPath = join(__dirname, '..', '..', '..', 'web-server');
+  const webFrontendPath = join(__dirname, '..', '..', '..', 'web');
 
   // Check if web-server directory exists
   if (!existsSync(webServerPath)) {

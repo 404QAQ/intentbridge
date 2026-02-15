@@ -1,13 +1,42 @@
-# IntentBridge Web UI Dashboard
+# IntentBridge Web UI Dashboard v3.1.0
 
 A beautiful web-based dashboard for managing your IntentBridge requirements.
+
+## 🎉 What's New in v3.1.0
+
+### 1. 🌙 Dark Mode
+- **Automatic detection**: Respects system preference
+- **Manual toggle**: One-click theme switching
+- **Persistent**: Remembers your choice in localStorage
+- **Smooth transitions**: Beautiful color transitions
+
+### 2. 🔄 Real-Time Updates
+- **Auto-refresh**: Data updates every 10 seconds
+- **Live status**: Shows last update timestamp
+- **Manual refresh**: Click to refresh anytime
+- **Error handling**: Graceful error display
+
+### 3. 🔍 Advanced Filtering
+- **Search**: Full-text search across titles and descriptions
+- **Status filter**: Filter by status (draft, active, implementing, done)
+- **Priority filter**: Filter by priority (high, medium, low)
+- **Tag filter**: Multi-select tag filtering
+- **Clear all**: Reset all filters with one click
+
+### 4. 📤 Export Functionality
+- **CSV Export**: Export to spreadsheet format
+- **JSON Export**: Export for programmatic use
+- **Markdown Export**: Export as formatted documentation
+- **Timestamped filenames**: Automatic date in filename
 
 ## Features
 
 - **Dashboard Overview**: View statistics and status distribution at a glance
-- **Requirements List**: Browse and filter requirements by status
+- **Requirements List**: Browse and filter requirements with advanced controls
 - **Requirement Details**: View detailed information and update status
-- **Real-time Updates**: Changes reflect immediately via API
+- **Real-time Updates**: Changes reflect immediately via polling
+- **Dark Mode**: Easy on the eyes, day or night
+- **Export Options**: Download your data in multiple formats
 
 ## Quick Start
 
@@ -42,8 +71,11 @@ The home page shows:
 ### Requirements List
 
 Browse all requirements with:
-- Status filter (all, draft, active, implementing, done)
-- Requirement cards showing title, description, status, priority, tags
+- **Search bar**: Search by title, description, or ID
+- **Filter panel**: Advanced multi-criteria filtering
+- **Export buttons**: Download in CSV, JSON, or Markdown
+- **Real-time updates**: Auto-refresh every 10 seconds
+- Status, priority, and tags display
 - Click to view details
 
 ### Requirement Details
@@ -62,19 +94,27 @@ Click any requirement to:
 ```
 web/
 ├── src/
-│   ├── App.tsx              # Main app with routing
+│   ├── App.tsx                      # Main app with routing & theme
+│   ├── components/
+│   │   ├── ThemeToggle.tsx          # Dark mode toggle
+│   │   ├── FilterPanel.tsx          # Advanced filtering
+│   │   └── ExportButton.tsx         # Export dropdown
+│   ├── hooks/
+│   │   ├── useTheme.ts              # Theme management
+│   │   ├── useRealtimeUpdates.ts    # Auto-refresh logic
+│   │   └── useExport.ts             # Export utilities
 │   ├── pages/
-│   │   ├── Home.tsx         # Dashboard page
-│   │   ├── Requirements.tsx  # Requirements list
-│   │   └── RequirementDetail.tsx  # Single requirement view
+│   │   ├── Home.tsx                 # Dashboard page
+│   │   ├── Requirements.tsx         # Requirements list (enhanced)
+│   │   └── RequirementDetail.tsx    # Single requirement view
 │   └── services/
-│       └── api.ts           # API client
+│       └── api.ts                   # API client
 ├── package.json
 └── vite.config.ts
 
 web-server/
 ├── src/
-│   └── server.ts            # Express API server
+│   └── server.ts                    # Express API server
 └── package.json
 ```
 
@@ -84,8 +124,9 @@ web-server/
 - React 18 + TypeScript
 - React Router v6
 - Recharts (charts)
-- TailwindCSS (styling)
+- TailwindCSS (styling) + Dark Mode
 - Vite (bundler)
+- Custom hooks for theme, updates, and export
 
 **Backend**:
 - Express.js
@@ -183,20 +224,24 @@ ib init
 ib req add  # Add some requirements
 ```
 
-### CORS Errors
+### Dark Mode Not Working
 
-The API server has CORS enabled for development. For production, configure allowed origins in `web-server/src/server.ts`.
+Clear your browser's localStorage and refresh the page. The theme toggle will initialize based on your system preference.
+
+### Real-time Updates Not Working
+
+Check that the API server is running on port 9528. You can manually refresh data using the "Refresh" link.
 
 ## Future Enhancements
 
 - [ ] User authentication
-- [ ] Real-time updates with WebSockets
-- [ ] Export to PDF/CSV
+- [ ] WebSocket-based real-time updates
+- [ ] PDF export with formatting
 - [ ] Bulk status updates
-- [ ] Advanced filtering and search
+- [ ] Advanced search with regex
 - [ ] Timeline view
 - [ ] Gantt charts for dependencies
-- [ ] Dark mode
+- [ ] Customizable dashboard widgets
 
 ## License
 

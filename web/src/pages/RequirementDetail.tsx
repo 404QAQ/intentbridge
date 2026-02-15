@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import apiService, { Requirement } from '../services/api';
 
 function RequirementDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [requirement, setRequirement] = useState<Requirement | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
