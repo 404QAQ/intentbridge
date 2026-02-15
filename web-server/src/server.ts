@@ -3,6 +3,9 @@ import cors from 'cors';
 import yaml from 'js-yaml';
 import fs from 'fs/promises';
 import path from 'path';
+import { loadConversation, addMessage, getConversationHistory, clearConversation, createConversation } from './services/conversationStore.js';
+import { loadStatus, updateStatus, getRecentLogs, addLog } from './services/statusMonitor.js';
+import { streamClaudeResponse, isClaudeConfigured, generateProjectContext } from './services/claudeService.js';
 
 const app = express();
 const PORT = process.env.WEB_SERVER_PORT || 9528;
@@ -209,9 +212,144 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// ==================== Project Status & Chat Routes ====================
+
+// GET /api/projects/:id/status - Get project execution status
+app.get('/api/projects/:id/status', async (req: Request, res: Response) => {
+  try {
+    const projectId = req.params.id;
+    const status = await loadStatus(projectId);
+
+    if (!status) {
+      res.status(404).json({ error: 'Project status not found' });
+      return;
+    }
+
+    res.json({ status });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to load project status' });
+  }
+});
+
+// GET /api/projects/:id/conversations - Get conversation history
+app.get('/api/projects/:id/conversations', async (req: Request, res: Response) => {
+  try {
+    const projectId = req.params.id;
+    const messages = await getConversationHistory(projectId);
+
+    res.json({ messages, count: messages.length });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to load conversation history' });
+  }
+});
+
+// DELETE /api/projects/:id/conversations - Clear conversation history
+app.delete('/api/projects/:id/conversations', async (req: Request, res: Response) => {
+  try {
+    const projectId = req.params.id;
+    await clearConversation(projectId);
+
+    res.json({ success: true, message: 'Conversation history cleared' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to clear conversation history' });
+  }
+});
+
+// POST /api/projects/:id/chat - Send message and get streaming response
+app.post('/api/projects/:id/chat', async (req: Request, res: Response) => {
+  try {
+    const projectId = req.params.id;
+    const { message } = req.body;
+
+    if (!message || typeof message !== 'string') {
+      res.status(400).json({ error: 'Message is required' });
+      return;
+    }
+
+    // Add user message to conversation
+    await addMessage(projectId, {
+      role: 'user',
+      content: message,
+    });
+
+    // Load conversation history
+    const history = await getConversationHistory(projectId);
+
+    // Load project context
+    const projects = await loadProjects();
+    const project = projects.find(p => p.path.includes(projectId) || p.name === projectId);
+    const requirements = await loadRequirements(project?.path);
+    const status = await loadStatus(projectId);
+
+    // Generate context
+    const context = generateProjectContext(project, requirements, status);
+
+    // Prepare messages for Claude
+    const messages = [
+      {
+        role: 'system',
+        content: `You are an AI assistant helping with the IntentBridge project management system.\n\nCurrent project context:\n${context}\n\nYou can help with:\n- Understanding requirements\n- Analyzing implementation progress\n- Providing development suggestions\n- Answering questions about the project\n\nBe helpful, concise, and focused on the project context.`,
+      },
+      ...history.slice(-10).map(m => ({
+        role: m.role,
+        content: m.content,
+      })),
+    ];
+
+    // Set headers for SSE
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    let assistantMessage = '';
+
+    // Stream response from Claude
+    await streamClaudeResponse(
+      messages,
+      (chunk) => {
+        // Send chunk as SSE
+        res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
+        assistantMessage += chunk;
+      },
+      async (fullResponse) => {
+        // Save assistant message to conversation
+        await addMessage(projectId, {
+          role: 'assistant',
+          content: fullResponse,
+        });
+
+        // Send completion event
+        res.write(`data: ${JSON.stringify({ type: 'complete', content: fullResponse })}\n\n`);
+        res.end();
+      },
+      (error) => {
+        console.error('Claude API error:', error);
+        res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
+        res.end();
+      }
+    );
+  } catch (error) {
+    console.error('Chat error:', error);
+    res.status(500).json({ error: 'Failed to process chat message' });
+  }
+});
+
+// GET /api/projects/:id/demo - Check if demo mode is active
+app.get('/api/projects/:id/demo', (req: Request, res: Response) => {
+  res.json({
+    demoMode: !isClaudeConfigured(),
+    message: isClaudeConfigured()
+      ? 'Claude API is configured'
+      : 'Running in demo mode. Set CLAUDE_API_KEY environment variable for real AI responses.',
+  });
+});
+
+// ==================== End Project Status & Chat Routes ====================
+
 // Start server
 app.listen(PORT, () => {
   console.log(`IntentBridge Web Server running at http://localhost:${PORT}`);
   console.log(`API endpoint: http://localhost:${PORT}/api`);
   console.log(`IntentBridge directory: ${INTENTBRIDGE_DIR}`);
+  console.log(`Claude API configured: ${isClaudeConfigured() ? 'Yes' : 'No (Demo mode)'}`);
 });

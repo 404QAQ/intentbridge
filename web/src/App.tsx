@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import Home from './pages/Home';
 import Requirements from './pages/Requirements';
 import RequirementDetail from './pages/RequirementDetail';
+import ProjectChat from './pages/ProjectChat';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useTheme } from './hooks/useTheme';
 
@@ -58,6 +59,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/requirements" element={<Requirements />} />
             <Route path="/requirements/:id" element={<RequirementDetail />} />
+            <Route path="/projects/:id/chat" element={<ProjectChat />} />
           </Routes>
         </main>
 
