@@ -19,6 +19,10 @@ import { readRequirements } from './store.js';
 import { readTasks } from './task-decomposition.js';
 import { executeMCPTool } from './mcp-tools.js';
 import { callModel, getAIConfig } from './ai-client.js';
+import { analyzeFile, checkQualityGates, DEFAULT_QUALITY_GATES } from './code-analyzer.js';
+import { performRuntimeValidation, DEFAULT_RUNTIME_CONFIG } from './runtime-validator.js';
+import { scanFile, DEFAULT_SECURITY_CONFIG } from './security-scanner.js';
+import { compareDesignWithImplementation, DEFAULT_COMPARATOR_CONFIG } from './design-comparator.js';
 import type {
   Requirement,
   Task,
@@ -27,6 +31,9 @@ import type {
   ValidationResult,
   ValidationReport,
   ValidationChecklist,
+  QualityGates,
+  HardValidationConfig,
+  HardValidationResult,
 } from '../models/types.js';
 
 let validationPath: string;
@@ -712,4 +719,285 @@ export function getRequirementValidationReports(requirementId: string): Validati
 export function getLatestValidationReport(requirementId: string): ValidationReport | undefined {
   const reports = getRequirementValidationReports(requirementId);
   return reports[reports.length - 1];
+}
+
+// ============================================
+// v3.0.0 Phase 4: 硬验证机制
+// ============================================
+
+/**
+ * 默认硬验证配置
+ */
+export const DEFAULT_HARD_VALIDATION_CONFIG: HardValidationConfig = {
+  enableCodeAnalysis: true,
+  enableRuntimeValidation: true,
+  enableSecurityScan: true,
+  enableDesignComparison: false, // 需要设计文档，默认关闭
+  qualityGates: {
+    codeQuality: {
+      complexity: 10,
+      duplication: 5,
+      maintainability: 'B',
+    },
+    security: {
+      hardcodedSecrets: 0,
+      sqlInjection: 0,
+      xssVulnerabilities: 0,
+      owaspTop10: 'pass',
+    },
+    implementation: {
+      emptyFunctions: 0,
+      todoComments: 0,
+      placeholderCode: false,
+    },
+    testing: {
+      coverage: 80,
+      passRate: 100,
+      e2eTests: false,
+    },
+  },
+  failOnViolation: true,
+  collectEvidence: true,
+};
+
+/**
+ * 执行硬验证（强约束验证）
+ */
+export async function performHardValidation(
+  requirementId: string,
+  config: Partial<HardValidationConfig> = {}
+): Promise<HardValidationResult> {
+  const finalConfig = { ...DEFAULT_HARD_VALIDATION_CONFIG, ...config };
+  const gateViolations: string[] = [];
+  const evidence: Evidence[] = [];
+  const recommendations: string[] = [];
+
+  console.log(`[HardValidation] Starting hard validation for: ${requirementId}`);
+
+  // 读取需求
+  const requirementsData = readRequirements();
+  const requirement = requirementsData.requirements.find((r) => r.id === requirementId);
+
+  if (!requirement) {
+    throw new Error(`Requirement ${requirementId} not found`);
+  }
+
+  const files = requirement.files || [];
+
+  // 1. 代码复杂度分析
+  let codeAnalysisResult: HardValidationResult['codeAnalysis'];
+  if (finalConfig.enableCodeAnalysis && files.length > 0) {
+    console.log('[HardValidation] Analyzing code complexity...');
+
+    try {
+      const analyses = files.map((file) => {
+        try {
+          return analyzeFile(file);
+        } catch {
+          return null;
+        }
+      }).filter(Boolean);
+
+      if (analyses.length > 0) {
+        const avgScore = analyses.reduce((sum, a) => sum + (a?.score || 0), 0) / analyses.length;
+        const avgComplexity = analyses.reduce((sum, a) => sum + (a?.metrics.cyclomaticComplexity || 0), 0) / analyses.length;
+
+        codeAnalysisResult = {
+          score: avgScore,
+          grade: analyses[0]?.grade || 'F',
+          issues: analyses.flatMap((a) => a?.issues.map((i) => i.message) || []),
+        };
+
+        // 检查质量门禁
+        if (avgComplexity > finalConfig.qualityGates.codeQuality.complexity) {
+          gateViolations.push(`Cyclomatic complexity ${avgComplexity.toFixed(1)} exceeds threshold ${finalConfig.qualityGates.codeQuality.complexity}`);
+        }
+
+        if (avgScore < 90) {
+          gateViolations.push(`Code quality score ${avgScore.toFixed(1)} below minimum 90`);
+          recommendations.push('Improve code quality: reduce complexity, add documentation, fix issues');
+        }
+      }
+    } catch (error: any) {
+      console.error('[HardValidation] Code analysis failed:', error.message);
+    }
+  }
+
+  // 2. 运行时验证
+  let runtimeValidationResult: HardValidationResult['runtimeValidation'];
+  if (finalConfig.enableRuntimeValidation) {
+    console.log('[HardValidation] Running runtime validation...');
+
+    try {
+      const testFiles = files.filter((f) => f.includes('.test.') || f.includes('.spec.'));
+      const hasTests = testFiles.length > 0;
+
+      if (hasTests) {
+        const runtimeResult = await performRuntimeValidation({
+          ...DEFAULT_RUNTIME_CONFIG,
+          testCommand: 'npm test',
+          coverageThreshold: finalConfig.qualityGates.testing.coverage,
+          passRateThreshold: finalConfig.qualityGates.testing.passRate,
+        });
+
+        runtimeValidationResult = {
+          passed: runtimeResult.success,
+          testResults: runtimeResult.testResults,
+          coverage: runtimeResult.coverageReport?.overall || 0,
+        };
+
+        // 检查质量门禁
+        if (runtimeResult.testResults.passRate < finalConfig.qualityGates.testing.passRate) {
+          gateViolations.push(`Test pass rate ${runtimeResult.testResults.passRate.toFixed(1)}% below threshold ${finalConfig.qualityGates.testing.passRate}%`);
+        }
+
+        if (runtimeResult.coverageReport && runtimeResult.coverageReport.overall < finalConfig.qualityGates.testing.coverage) {
+          gateViolations.push(`Test coverage ${runtimeResult.coverageReport.overall.toFixed(1)}% below threshold ${finalConfig.qualityGates.testing.coverage}%`);
+        }
+
+        if (!runtimeResult.success) {
+          recommendations.push('Fix failing tests and improve test coverage');
+        }
+      } else {
+        gateViolations.push('No test files found');
+        recommendations.push('Add unit tests to meet minimum coverage requirements');
+      }
+    } catch (error: any) {
+      console.error('[HardValidation] Runtime validation failed:', error.message);
+      gateViolations.push('Runtime validation failed to execute');
+    }
+  }
+
+  // 3. 安全扫描
+  let securityScanResult: HardValidationResult['securityScan'];
+  if (finalConfig.enableSecurityScan && files.length > 0) {
+    console.log('[HardValidation] Scanning for security vulnerabilities...');
+
+    try {
+      const scanResults = files.map((file) => {
+        try {
+          return scanFile(file, DEFAULT_SECURITY_CONFIG);
+        } catch {
+          return null;
+        }
+      }).filter(Boolean);
+
+      const totalVulnerabilities = scanResults.reduce((sum, r) => sum + (r?.vulnerabilities.length || 0), 0);
+      const criticalCount = scanResults.reduce(
+        (sum, r) => sum + (r?.vulnerabilities.filter((v) => v.severity === 'critical').length || 0),
+        0
+      );
+      const highCount = scanResults.reduce(
+        (sum, r) => sum + (r?.vulnerabilities.filter((v) => v.severity === 'high').length || 0),
+        0
+      );
+
+      securityScanResult = {
+        passed: criticalCount === 0 && highCount === 0,
+        vulnerabilities: totalVulnerabilities,
+        riskLevel: criticalCount > 0 ? 'critical' : highCount > 0 ? 'high' : 'medium',
+      };
+
+      // 检查质量门禁
+      if (criticalCount > finalConfig.qualityGates.security.hardcodedSecrets) {
+        gateViolations.push(`Found ${criticalCount} critical security vulnerabilities (threshold: ${finalConfig.qualityGates.security.hardcodedSecrets})`);
+      }
+
+      const sqlInjectionCount = scanResults.reduce(
+        (sum, r) => sum + (r?.vulnerabilities.filter((v) => v.type === 'injection').length || 0),
+        0
+      );
+      if (sqlInjectionCount > finalConfig.qualityGates.security.sqlInjection) {
+        gateViolations.push(`Found ${sqlInjectionCount} SQL injection risks (threshold: ${finalConfig.qualityGates.security.sqlInjection})`);
+      }
+
+      if (!securityScanResult.passed) {
+        recommendations.push('Fix critical and high severity security vulnerabilities');
+      }
+    } catch (error: any) {
+      console.error('[HardValidation] Security scan failed:', error.message);
+      gateViolations.push('Security scan failed to execute');
+    }
+  }
+
+  // 4. 设计文档比较（如果启用且有设计文档）
+  let designComparisonResult: HardValidationResult['designComparison'];
+  if (finalConfig.enableDesignComparison) {
+    console.log('[HardValidation] Comparing with design specification...');
+
+    try {
+      // 查找设计文档
+      const designDocPath = findDesignDocument();
+      if (designDocPath) {
+        const { loadDesignSpecification } = await import('./design-comparator.js');
+        const spec = loadDesignSpecification(designDocPath);
+        const comparison = compareDesignWithImplementation(spec, process.cwd(), DEFAULT_COMPARATOR_CONFIG);
+
+        designComparisonResult = {
+          passed: comparison.passed,
+          compliance: comparison.compliance.overallCompliance,
+          gaps: comparison.gaps.missingFeatures,
+        };
+
+        if (!comparison.passed) {
+          gateViolations.push(`Design compliance ${comparison.compliance.overallCompliance.toFixed(1)}% below threshold`);
+          recommendations.push(...comparison.recommendations);
+        }
+      }
+    } catch (error: any) {
+      console.error('[HardValidation] Design comparison failed:', error.message);
+    }
+  }
+
+  // 计算总体评分
+  let overallScore = 100;
+  if (codeAnalysisResult) {
+    overallScore = Math.min(overallScore, codeAnalysisResult.score);
+  }
+  if (runtimeValidationResult) {
+    overallScore = Math.min(overallScore, runtimeValidationResult.coverage);
+  }
+  if (securityScanResult) {
+    overallScore = Math.min(overallScore, securityScanResult.passed ? 100 : 50);
+  }
+  if (designComparisonResult) {
+    overallScore = Math.min(overallScore, designComparisonResult.compliance);
+  }
+
+  // 确定是否通过
+  const passed = gateViolations.length === 0 || !finalConfig.failOnViolation;
+
+  return {
+    passed,
+    overallScore,
+    codeAnalysis: codeAnalysisResult,
+    runtimeValidation: runtimeValidationResult,
+    securityScan: securityScanResult,
+    designComparison: designComparisonResult,
+    gateViolations,
+    evidence,
+    recommendations,
+  };
+}
+
+/**
+ * 查找设计文档
+ */
+function findDesignDocument(): string | null {
+  const possiblePaths = [
+    '.intentbridge/design.yaml',
+    '.intentbridge/design.yml',
+    '.intentbridge/design.json',
+    'design.yaml',
+    'design.yml',
+    'design.json',
+  ];
+
+  for (const path of possiblePaths) {
+    if (existsSync(path)) {
+      return path;
+    }
+  }
+
+  return null;
 }

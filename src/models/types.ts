@@ -485,3 +485,86 @@ export interface ValidationResult {
   needsRevision: boolean;
   revisionTasks?: string[];           // 需要修订的任务列表
 }
+
+// === v3.0.0 Phase 4 新增：硬验证质量门禁 ===
+
+/**
+ * 质量门禁配置
+ */
+export interface QualityGates {
+  codeQuality: {
+    complexity: number;               // 圈复杂度 ≤ 10
+    duplication: number;              // 代码重复率 < 5%
+    maintainability: string;          // 可维护性等级 ≥ 'B'
+  };
+
+  security: {
+    hardcodedSecrets: number;         // 硬编码密钥数量 = 0
+    sqlInjection: number;             // SQL 注入风险 = 0
+    xssVulnerabilities: number;       // XSS 漏洞 = 0
+    owaspTop10: 'pass' | 'fail';      // OWASP Top 10 检查
+  };
+
+  implementation: {
+    emptyFunctions: number;           // 空函数数量 = 0
+    todoComments: number;             // TODO 注释数量 = 0
+    placeholderCode: boolean;         // 占位代码 = false
+  };
+
+  testing: {
+    coverage: number;                 // 测试覆盖率 ≥ 80%
+    passRate: number;                 // 测试通过率 = 100%
+    e2eTests: boolean;                // 是否有端到端测试
+  };
+}
+
+/**
+ * 硬验证配置
+ */
+export interface HardValidationConfig {
+  enableCodeAnalysis: boolean;        // 启用代码复杂度分析
+  enableRuntimeValidation: boolean;   // 启用运行时验证
+  enableSecurityScan: boolean;        // 启用安全扫描
+  enableDesignComparison: boolean;    // 启用设计比较
+
+  qualityGates: QualityGates;         // 质量门禁配置
+
+  failOnViolation: boolean;           // 违反门禁时失败
+  collectEvidence: boolean;           // 收集证据
+}
+
+/**
+ * 硬验证结果
+ */
+export interface HardValidationResult {
+  passed: boolean;
+  overallScore: number;               // 0-100
+
+  codeAnalysis?: {
+    score: number;
+    grade: string;
+    issues: string[];
+  };
+
+  runtimeValidation?: {
+    passed: boolean;
+    testResults: any;
+    coverage: number;
+  };
+
+  securityScan?: {
+    passed: boolean;
+    vulnerabilities: number;
+    riskLevel: string;
+  };
+
+  designComparison?: {
+    passed: boolean;
+    compliance: number;
+    gaps: string[];
+  };
+
+  gateViolations: string[];           // 违反的门禁列表
+  evidence: Evidence[];               // 证据列表
+  recommendations: string[];          // 改进建议
+}
