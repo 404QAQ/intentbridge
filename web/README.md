@@ -1,5 +1,7 @@
 # IntentBridge Web UI Dashboard v3.1.0
 
+**[中文文档](README_CN.md)** | **English**
+
 A beautiful web-based dashboard for managing your IntentBridge requirements.
 
 ## 🎉 What's New in v3.1.0

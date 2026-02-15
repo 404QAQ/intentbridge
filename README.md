@@ -2,6 +2,8 @@
 
 <div align="center">
 
+**[English](README.md)** | **[中文文档](README_CN.md)**
+
 **AI-Powered Requirement Management for Claude Code**
 
 [![npm version](https://badge.fury.io/js/intentbridge.svg)](https://badge.fury.io/js/intentbridge)
