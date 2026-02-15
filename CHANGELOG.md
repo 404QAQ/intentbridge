@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-02-16
+
+### 🚀 Major Feature: Multi-Project Coordination System
+
+This release introduces comprehensive multi-project management capabilities, allowing IntentBridge to coordinate multiple projects running simultaneously with automatic port management, process monitoring, and resource coordination.
+
+### Added - Port Management
+- **Port Scanner Service** - Cross-platform port scanning (macOS/Linux/Windows)
+- **Port Conflict Detection** - Automatic detection and prevention of port conflicts
+- **Automatic Port Allocation** - Find and assign available ports automatically
+- **Port Monitoring** - Track which ports each project is using
+- **New Commands**: `ib project ports <name>`, `ib project ports check`, `ib project ports find`, `ib project ports assign`, `ib project ports release`
+
+### Added - Process Management
+- **Process Monitor Service** - Real-time process monitoring with resource tracking
+- **Process Lifecycle Management** - Start, stop, and restart projects with monitoring
+- **Resource Usage Tracking** - Monitor CPU and memory usage per project
+- **Batch Operations** - Start/stop all projects at once
+- **New Commands**: `ib project start`, `ib project stop`, `ib project restart`, `ib project start-all`, `ib project stop-all`, `ib project ps`
+
+### Added - Resource Coordination
+- **Project Coordinator Service** - Multi-project orchestration and coordination
+- **Dependency Orchestration** - Topological startup/shutdown ordering
+- **Resource Dashboard** - Real-time view of all projects, ports, and resources
+- **Resource Alerts** - Identify resource-intensive projects
+- **New Commands**: `ib project resources`, `ib project resources top`, `ib project dependencies`, `ib project graph`, `ib project dashboard`, `ib project config`
+
+### Added - Documentation
+- **Multi-Project Coordination Guide** - Comprehensive 570-line documentation with architecture diagrams, use cases, and best practices
+
+### Changed - Codebase
+- Added 3,124 lines of new code (3 new services, 1 command handler)
+- Enhanced `bin/ib.ts` with 18 new CLI commands
+- Added 20+ new TypeScript types for coordination
+- Enhanced global store with runtime tracking
+
+### Removed - Cleanup
+- Removed outdated internal development documents (IMPROVEMENT_ANALYSIS.md, PROJECT_CHAT_ARCHITECTURE.md, etc.)
+- Removed temporary planning and release documents
+- Cleaned up docs directory to only include user-facing documentation
+
 ## [3.0.1] - 2026-02-15
 
 ### Fixed
