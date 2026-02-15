@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2026-02-15
+
+### Fixed
+- **Version Display Inconsistency** - Fixed `ib --version` showing hardcoded "2.4.0" instead of actual version
+  - Version is now read dynamically from package.json
+  - Ensures version consistency across all commands
+- **Template Loading Failure** - Fixed templates not loading (returning null)
+  - Corrected TEMPLATES_DIR path resolution for compiled code
+  - All 5 templates now load correctly: crud, auth, api, ui, database
+  - Fixed build script to properly copy templates to dist directory
+
+### Changed
+- Enhanced build script to clean templates directory before copy
+- Improved version management to use package.json as single source of truth
+
 ## [3.0.0] - 2026-02-15
 
 ### 🎉 Major Release - Complete AI Task Management System

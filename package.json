@@ -1,6 +1,6 @@
 {
   "name": "intentbridge",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "AI-powered requirement management tool for Claude Code with natural language interface, MCP integration, and smart project scaffolding",
   "type": "module",
   "main": "dist/index.js",
