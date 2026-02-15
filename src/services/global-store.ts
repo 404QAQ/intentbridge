@@ -1,7 +1,7 @@
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
-import type { Requirement } from '../models/types.js';
+import type { Requirement, ProjectRuntimeConfig, CoordinationConfig, PortStatus, ProcessInfo, GlobalStatus, SystemResources, ProjectResources, ResourceUsage, PortConflict, ProjectDependencyGraph } from '../models/types.js';
 
 export interface ProjectMeta {
   name: string;
@@ -13,6 +13,8 @@ export interface ProjectMeta {
   lastAccessed: string;
   status: 'active' | 'paused' | 'archived';
   linkedProjects?: string[]; // 关联的项目名称
+  runtime?: ProjectRuntimeConfig; // v3.1.0: 运行时配置
+  requiredPorts?: number[]; // v3.1.0: 项目需要的端口
 }
 
 export interface GlobalConfig {
@@ -21,6 +23,7 @@ export interface GlobalConfig {
   projects: ProjectMeta[];
   sharedFiles: SharedFile[];
   settings: GlobalSettings;
+  coordination?: CoordinationConfig; // v3.1.0: 协调配置
 }
 
 export interface SharedFile {
@@ -74,7 +77,7 @@ export function loadGlobalConfig(): GlobalConfig {
   if (!existsSync(configPath)) {
     // Initialize with default config
     const defaultConfig: GlobalConfig = {
-      version: '2.2.0',
+      version: '3.1.0',
       projects: [],
       sharedFiles: [],
       settings: {
@@ -82,6 +85,17 @@ export function loadGlobalConfig(): GlobalConfig {
         syncInterval: 30,
         maxProjects: 50,
         defaultView: 'current',
+      },
+      coordination: {
+        portRanges: {
+          frontend: '3000-3999',
+          backend: '8000-8999',
+          database: '9000-9999',
+          mcp: '9500-9599',
+          web: '9600-9699',
+        },
+        reservedPorts: [],
+        autoPortAssignment: true,
       },
     };
     saveGlobalConfig(defaultConfig);
@@ -372,4 +386,228 @@ export function getProjectStats(): {
     archived: config.projects.filter(p => p.status === 'archived').length,
     linkedCount: config.projects.filter(p => p.linkedProjects && p.linkedProjects.length > 0).length,
   };
+}
+
+// === v3.1.0 新增：运行时协调功能 ===
+
+/**
+ * Update project runtime configuration
+ */
+export function updateProjectRuntime(
+  projectName: string,
+  runtime: Partial<ProjectRuntimeConfig>
+): void {
+  const config = loadGlobalConfig();
+  const project = config.projects.find(p => p.name === projectName);
+
+  if (!project) {
+    throw new Error(`Project "${projectName}" not found`);
+  }
+
+  project.runtime = {
+    ...project.runtime,
+    ...runtime,
+  };
+
+  saveGlobalConfig(config);
+}
+
+/**
+ * Get project runtime configuration
+ */
+export function getProjectRuntime(projectName: string): ProjectRuntimeConfig | null {
+  const project = getProject(projectName);
+  return project?.runtime || null;
+}
+
+/**
+ * Reserve ports for a project
+ */
+export function reservePorts(
+  projectName: string,
+  ports: number[]
+): void {
+  const config = loadGlobalConfig();
+  const project = config.projects.find(p => p.name === projectName);
+
+  if (!project) {
+    throw new Error(`Project "${projectName}" not found`);
+  }
+
+  // Check for conflicts
+  const conflicts: number[] = [];
+  for (const port of ports) {
+    const reservedByOther = config.projects.find(
+      p => p.name !== projectName && p.requiredPorts?.includes(port)
+    );
+    if (reservedByOther) {
+      conflicts.push(port);
+    }
+  }
+
+  if (conflicts.length > 0) {
+    throw new Error(`Port conflicts detected: ${conflicts.join(', ')}`);
+  }
+
+  project.requiredPorts = [...new Set([...(project.requiredPorts || []), ...ports])];
+  saveGlobalConfig(config);
+}
+
+/**
+ * Release ports for a project
+ */
+export function releasePorts(
+  projectName: string,
+  ports?: number[]
+): void {
+  const config = loadGlobalConfig();
+  const project = config.projects.find(p => p.name === projectName);
+
+  if (!project) {
+    throw new Error(`Project "${projectName}" not found`);
+  }
+
+  if (!project.requiredPorts) return;
+
+  if (ports) {
+    project.requiredPorts = project.requiredPorts.filter(p => !ports.includes(p));
+  } else {
+    project.requiredPorts = [];
+  }
+
+  saveGlobalConfig(config);
+}
+
+/**
+ * Get all reserved ports
+ */
+export function getReservedPorts(): Array<{ port: number; project: string }> {
+  const config = loadGlobalConfig();
+  const reserved: Array<{ port: number; project: string }> = [];
+
+  for (const project of config.projects) {
+    if (project.requiredPorts) {
+      for (const port of project.requiredPorts) {
+        reserved.push({ port, project: project.name });
+      }
+    }
+  }
+
+  return reserved.sort((a, b) => a.port - b.port);
+}
+
+/**
+ * Update coordination configuration
+ */
+export function updateCoordinationConfig(
+  coordination: Partial<CoordinationConfig>
+): void {
+  const config = loadGlobalConfig();
+  config.coordination = {
+    ...config.coordination,
+    ...coordination,
+  };
+  saveGlobalConfig(config);
+}
+
+/**
+ * Get coordination configuration
+ */
+export function getCoordinationConfig(): CoordinationConfig {
+  const config = loadGlobalConfig();
+  return config.coordination || {
+    portRanges: {},
+    reservedPorts: [],
+    autoPortAssignment: true,
+  };
+}
+
+/**
+ * Register project with runtime configuration
+ */
+export function registerProjectWithRuntime(
+  projectPath: string,
+  meta: Partial<ProjectMeta> & { runtime?: ProjectRuntimeConfig }
+): ProjectMeta {
+  const project = registerProject(projectPath, meta);
+
+  if (meta.runtime) {
+    updateProjectRuntime(project.name, meta.runtime);
+  }
+
+  if (meta.requiredPorts) {
+    reservePorts(project.name, meta.requiredPorts);
+  }
+
+  return getProject(project.name)!;
+}
+
+/**
+ * Get project dependencies (linked projects)
+ */
+export function getProjectDependencies(projectName: string): string[] {
+  const project = getProject(projectName);
+  return project?.linkedProjects || [];
+}
+
+/**
+ * Get project dependents (projects that depend on this one)
+ */
+export function getProjectDependents(projectName: string): string[] {
+  const config = loadGlobalConfig();
+  return config.projects
+    .filter(p => p.linkedProjects?.includes(projectName))
+    .map(p => p.name);
+}
+
+/**
+ * Get dependency graph for all projects
+ */
+export function getDependencyGraph(): ProjectDependencyGraph {
+  const config = loadGlobalConfig();
+  const nodes: ProjectDependencyGraph['nodes'] = [];
+  const edges: ProjectDependencyGraph['edges'] = [];
+
+  for (const project of config.projects) {
+    nodes.push({
+      name: project.name,
+      status: 'stopped', // Will be updated by coordinator
+      dependencies: project.linkedProjects || [],
+      dependents: config.projects
+        .filter(p => p.linkedProjects?.includes(project.name))
+        .map(p => p.name),
+    });
+
+    for (const dep of project.linkedProjects || []) {
+      edges.push({
+        from: project.name,
+        to: dep,
+        type: 'hard',
+      });
+    }
+  }
+
+  // Calculate start order using topological sort
+  const visited = new Set<string>();
+  const startOrder: string[] = [];
+
+  function visit(name: string) {
+    if (visited.has(name)) return;
+    visited.add(name);
+
+    const project = config.projects.find(p => p.name === name);
+    if (project?.linkedProjects) {
+      for (const dep of project.linkedProjects) {
+        visit(dep);
+      }
+    }
+
+    startOrder.push(name);
+  }
+
+  for (const project of config.projects) {
+    visit(project.name);
+  }
+
+  return { nodes, edges, startOrder };
 }

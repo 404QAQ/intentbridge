@@ -568,3 +568,237 @@ export interface HardValidationResult {
   evidence: Evidence[];               // 证据列表
   recommendations: string[];          // 改进建议
 }
+
+// === v3.1.0 新增：多项目协调系统 ===
+
+/**
+ * 端口状态
+ */
+export interface PortStatus {
+  port: number;
+  inUse: boolean;
+  process?: ProcessInfo;
+  project?: string;                   // 关联的项目名称
+  reserved?: boolean;                 // 是否被保留
+  reservedBy?: string;                // 保留者
+  reservedAt?: string;                // 保留时间
+}
+
+/**
+ * 进程信息
+ */
+export interface ProcessInfo {
+  pid: number;
+  command: string;
+  args?: string[];
+  user?: string;
+  startTime?: string;
+  cpu?: number;                       // CPU 使用百分比
+  memory?: number;                    // 内存使用 (MB)
+  status?: 'running' | 'sleeping' | 'stopped' | 'zombie' | 'unknown';
+  ports?: number[];                   // 进程占用的端口
+  project?: string;                   // 关联的项目
+}
+
+/**
+ * 资源使用情况
+ */
+export interface ResourceUsage {
+  cpu: number;                        // CPU 使用百分比
+  memory: number;                     // 内存使用 (MB)
+  memoryPercent: number;              // 内存使用百分比
+  disk?: number;                      // 磁盘使用 (MB)
+  network?: {
+    rxBytes: number;                  // 接收字节数
+    txBytes: number;                  // 发送字节数
+    rxRate: number;                   // 接收速率 (bytes/s)
+    txRate: number;                   // 发送速率 (bytes/s)
+  };
+  timestamp: string;
+}
+
+/**
+ * 项目运行时配置
+ */
+export interface ProjectRuntimeConfig {
+  ports?: Record<string, number>;      // 服务名 -> 端口
+  processes?: Record<string, number>;  // 进程名 -> PID
+  environment?: Record<string, string>;
+  commands?: {
+    start?: string;
+    stop?: string;
+    restart?: string;
+    test?: string;
+    build?: string;
+  };
+  resources?: {
+    cpu?: string;                     // CPU 限制
+    memory?: string;                  // 内存限制
+  };
+  lastStarted?: string;
+  uptime?: string;
+  autoRestart?: boolean;
+}
+
+/**
+ * 端口冲突
+ */
+export interface PortConflict {
+  port: number;
+  conflictType: 'already_in_use' | 'reserved' | 'out_of_range';
+  currentProcess?: ProcessInfo;
+  requestedBy?: string;               // 请求占用的项目
+  suggestions?: number[];             // 建议的替代端口
+}
+
+/**
+ * 资源冲突
+ */
+export interface ResourceConflict {
+  type: 'cpu' | 'memory' | 'disk' | 'network';
+  required: number;
+  available: number;
+  currentUsage: number;
+  conflicts: string[];                // 冲突的项目列表
+}
+
+/**
+ * 系统资源
+ */
+export interface SystemResources {
+  cpu: {
+    cores: number;
+    model?: string;
+    usage: number;                    // 总体使用率
+    loadAverage?: [number, number, number];
+  };
+  memory: {
+    total: number;                    // 总内存 (MB)
+    used: number;                     // 已用内存 (MB)
+    free: number;                     // 可用内存 (MB)
+    usagePercent: number;
+  };
+  disk?: {
+    total: number;                    // 总磁盘 (GB)
+    used: number;                     // 已用磁盘 (GB)
+    free: number;                     // 可用磁盘 (GB)
+    usagePercent: number;
+  };
+  network?: {
+    interfaces: string[];
+    connections: number;
+  };
+  timestamp: string;
+}
+
+/**
+ * 项目资源
+ */
+export interface ProjectResources {
+  projectName: string;
+  status: 'running' | 'stopped' | 'error' | 'unknown';
+  processes: ProcessInfo[];
+  ports: PortStatus[];
+  resourceUsage: ResourceUsage;
+  startedAt?: string;
+  uptime?: number;                    // 运行时间 (秒)
+}
+
+/**
+ * 全局状态
+ */
+export interface GlobalStatus {
+  projects: Array<{
+    name: string;
+    status: 'running' | 'stopped' | 'error' | 'unknown';
+    ports: number[];
+    processes: number;                // 进程数量
+    cpu: number;                      // CPU 使用率
+    memory: number;                   // 内存使用 (MB)
+    uptime?: string;
+  }>;
+  system: SystemResources;
+  portConflicts: PortConflict[];
+  resourceConflicts: ResourceConflict[];
+  summary: {
+    totalProjects: number;
+    runningProjects: number;
+    totalProcesses: number;
+    totalPorts: number;
+  };
+  timestamp: string;
+}
+
+/**
+ * 协调配置
+ */
+export interface CoordinationConfig {
+  portRanges?: Record<string, string>; // 项目类型 -> 端口范围 (如 "3000-3999")
+  reservedPorts?: number[];            // 系统保留端口
+  maxProjectsPerType?: number;        // 每类型最大项目数
+  autoPortAssignment?: boolean;       // 自动分配端口
+  resourceLimits?: {
+    maxCpuPerProject?: number;        // 每项目最大 CPU (%)
+    maxMemoryPerProject?: number;     // 每项目最大内存 (MB)
+  };
+}
+
+/**
+ * 启动选项
+ */
+export interface StartOptions {
+  autoPorts?: boolean;                // 自动分配端口
+  withDependencies?: boolean;         // 启动依赖项目
+  dryRun?: boolean;                   // 预运行模式
+  timeout?: number;                   // 超时时间 (秒)
+  environment?: Record<string, string>;
+}
+
+/**
+ * 项目依赖图 (v3.1.0)
+ */
+export interface ProjectDependencyGraph {
+  nodes: Array<{
+    name: string;
+    status: 'running' | 'stopped' | 'pending' | 'error' | 'unknown';
+    dependencies: string[];
+    dependents: string[];
+  }>;
+  edges: Array<{
+    from: string;
+    to: string;
+    type: 'hard' | 'soft';
+  }>;
+  startOrder: string[];               // 启动顺序
+}
+
+/**
+ * 进程选项
+ */
+export interface ProcessOptions {
+  cwd?: string;                       // 工作目录
+  env?: Record<string, string>;       // 环境变量
+  detached?: boolean;                 // 分离模式
+  shell?: boolean;                    // 使用 shell
+  timeout?: number;                   // 超时时间 (毫秒)
+}
+
+/**
+ * 仪表盘视图类型
+ */
+export type DashboardView = 'overview' | 'ports' | 'processes' | 'resources' | 'dependencies' | 'logs';
+
+/**
+ * 仪表盘配置
+ */
+export interface DashboardConfig {
+  view: DashboardView;
+  refreshInterval: number;            // 刷新间隔 (毫秒)
+  sortBy?: string;                    // 排序字段
+  sortOrder?: 'asc' | 'desc';         // 排序方向
+  filter?: {
+    projects?: string[];
+    status?: string[];
+    ports?: number[];
+  };
+}

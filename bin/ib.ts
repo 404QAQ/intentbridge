@@ -1025,6 +1025,9 @@ project
   .option('-d, --description <desc>', 'Project description')
   .option('-t, --tags <tags>', 'Comma-separated tags')
   .option('-p, --priority <priority>', 'Priority (low/medium/high/critical)')
+  .option('--ports <ports>', 'Required ports (comma-separated)')
+  .option('--start <command>', 'Start command')
+  .option('--stop <command>', 'Stop command')
   .action(async (path?: string, options?: any) => {
     try {
       await projectRegisterCommand(path, options);
@@ -1466,6 +1469,267 @@ plugin
   .action((name: string) => {
     try {
       pluginInfoCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// v3.1.0 新增：项目协调命令
+import {
+  projectStartCommand,
+  projectStopCommand,
+  projectRestartCommand,
+  projectStartAllCommand,
+  projectStopAllCommand,
+  projectPortsCommand,
+  projectPortsCheckCommand,
+  projectPortsFindCommand,
+  projectPortsAssignCommand,
+  projectPortsReleaseCommand,
+  projectResourcesCommand,
+  projectResourcesTopCommand,
+  projectPsCommand,
+  projectDependenciesCommand,
+  projectGraphCommand,
+  projectDashboardCommand,
+  projectConfigCommand,
+} from '../src/commands/project-orchestrate.js';
+
+// ib project start <name>
+project
+  .command('start <name>')
+  .description('Start a project')
+  .option('--auto-ports', 'Automatically assign available ports')
+  .option('--with-deps', 'Start dependencies first')
+  .option('--dry-run', 'Preview without starting')
+  .option('--timeout <seconds>', 'Start timeout')
+  .action(async (name: string, options: any) => {
+    try {
+      await projectStartCommand(name, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project stop <name>
+project
+  .command('stop <name>')
+  .description('Stop a project')
+  .option('--with-dependents', 'Stop dependents first')
+  .action(async (name: string, options: any) => {
+    try {
+      await projectStopCommand(name, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project restart <name>
+project
+  .command('restart <name>')
+  .description('Restart a project')
+  .option('--auto-ports', 'Automatically assign available ports')
+  .option('--with-deps', 'Start dependencies first')
+  .option('--timeout <seconds>', 'Start timeout')
+  .action(async (name: string, options: any) => {
+    try {
+      await projectRestartCommand(name, options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project start-all
+project
+  .command('start-all')
+  .description('Start all active projects')
+  .option('--auto-ports', 'Automatically assign available ports')
+  .option('--dry-run', 'Preview without starting')
+  .action(async (options: any) => {
+    try {
+      await projectStartAllCommand(options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project stop-all
+project
+  .command('stop-all')
+  .description('Stop all running projects')
+  .action(async () => {
+    try {
+      await projectStopAllCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project ports
+const projectPorts = project
+  .command('ports')
+  .description('Port management');
+
+projectPorts
+  .command('<name>')
+  .description('Show ports for a project')
+  .action(async (name: string) => {
+    try {
+      await projectPortsCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+projectPorts
+  .command('check')
+  .description('Check for port conflicts')
+  .action(async () => {
+    try {
+      await projectPortsCheckCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+projectPorts
+  .command('find')
+  .description('Find available ports')
+  .option('-r, --range <range>', 'Port range (e.g., 3000-4000)')
+  .option('-c, --count <number>', 'Number of ports to find')
+  .action(async (options: any) => {
+    try {
+      await projectPortsFindCommand(options);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+projectPorts
+  .command('assign <name> <port>')
+  .description('Assign a port to a project')
+  .action(async (name: string, port: string) => {
+    try {
+      await projectPortsAssignCommand(name, port);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+projectPorts
+  .command('release <name> [port]')
+  .description('Release port(s) from a project')
+  .action(async (name: string, port?: string) => {
+    try {
+      await projectPortsReleaseCommand(name, port);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project resources
+const projectResources = project
+  .command('resources')
+  .description('Resource management');
+
+projectResources
+  .command('<name>')
+  .description('Show resource usage for a project')
+  .action(async (name: string) => {
+    try {
+      await projectResourcesCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+projectResources
+  .command('top')
+  .description('Show resource usage for all projects')
+  .action(async () => {
+    try {
+      await projectResourcesTopCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project ps
+project
+  .command('ps')
+  .description('Show all running processes')
+  .action(async () => {
+    try {
+      await projectPsCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project dependencies <name>
+project
+  .command('dependencies <name>')
+  .description('Show project dependencies')
+  .action((name: string) => {
+    try {
+      projectDependenciesCommand(name);
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project graph
+project
+  .command('graph')
+  .description('Show dependency graph')
+  .action(async () => {
+    try {
+      await projectGraphCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project dashboard
+project
+  .command('dashboard')
+  .description('Show project dashboard')
+  .action(async () => {
+    try {
+      await projectDashboardCommand();
+    } catch (e: any) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+// ib project config <name>
+project
+  .command('config <name>')
+  .description('Configure project runtime')
+  .option('--set-start <command>', 'Set start command')
+  .option('--set-stop <command>', 'Set stop command')
+  .option('--set-ports <ports>', 'Set ports (service:port,service:port)')
+  .option('--set-env <env>', 'Set environment (KEY=value,KEY=value)')
+  .action(async (name: string, options: any) => {
+    try {
+      await projectConfigCommand(name, options);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);

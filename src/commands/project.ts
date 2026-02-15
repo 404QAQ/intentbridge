@@ -12,6 +12,9 @@ import {
   loadGlobalConfig,
   shareFile,
   listSharedFiles,
+  updateProjectRuntime,
+  reservePorts,
+  getProjectRuntime,
 } from '../services/global-store.js';
 import { readRequirements } from '../services/store.js';
 import { prompt, closePrompt } from '../utils/prompt.js';
@@ -29,6 +32,9 @@ export async function projectRegisterCommand(
     description?: string;
     tags?: string;
     priority?: string;
+    ports?: string;
+    start?: string;
+    stop?: string;
   }
 ): Promise<void> {
   const targetPath = projectPath ? resolve(projectPath) : process.cwd();
@@ -53,19 +59,64 @@ export async function projectRegisterCommand(
   const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()) : [];
   const priority = priorityInput || 'medium';
 
+  // Parse ports if provided
+  let ports: number[] = [];
+  if (options?.ports) {
+    ports = options.ports.split(',').map(p => parseInt(p.trim(), 10)).filter(p => !isNaN(p));
+  }
+
   try {
     const project = registerProject(targetPath, {
       name: name || undefined,
       description: description || undefined,
       tags,
       priority: priority as any,
+      requiredPorts: ports,
     });
+
+    // Set up runtime configuration if provided
+    if (options?.start || options?.stop || ports.length > 0) {
+      const runtime: {
+        commands?: { start?: string; stop?: string };
+        ports?: Record<string, number>;
+      } = {};
+
+      if (options?.start || options?.stop) {
+        runtime.commands = {};
+        if (options?.start) runtime.commands.start = options.start;
+        if (options?.stop) runtime.commands.stop = options.stop;
+      }
+
+      if (ports.length > 0) {
+        runtime.ports = {};
+        // Auto-name ports if single port
+        if (ports.length === 1) {
+          runtime.ports.main = ports[0];
+        } else {
+          ports.forEach((port, index) => {
+            runtime.ports! [`port${index + 1}`] = port;
+          });
+        }
+      }
+
+      updateProjectRuntime(project.name, runtime);
+
+      // Reserve ports
+      if (ports.length > 0) {
+        reservePorts(project.name, ports);
+      }
+    }
 
     console.log('');
     console.log(chalk.green('✔ Project registered successfully'));
     console.log(`  Name: ${project.name}`);
     console.log(`  Path: ${project.path}`);
     console.log(`  Status: ${project.status}`);
+
+    if (ports.length > 0) {
+      console.log(`  Ports: ${ports.join(', ')}`);
+    }
+
     closePrompt();
   } catch (e: any) {
     console.log(chalk.red(`Error: ${e.message}`));
@@ -206,6 +257,26 @@ export function projectStatusCommand(projectName?: string): void {
 
   if (project.linkedProjects && project.linkedProjects.length > 0) {
     console.log(`Linked Projects: ${project.linkedProjects.join(', ')}`);
+  }
+
+  // Show runtime configuration (v3.1.0)
+  const runtime = getProjectRuntime(project.name);
+  if (runtime) {
+    console.log('');
+    console.log(chalk.bold('Runtime Configuration:'));
+
+    if (runtime.ports && Object.keys(runtime.ports).length > 0) {
+      console.log(`  Ports: ${Object.entries(runtime.ports).map(([s, p]) => `${s}:${p}`).join(', ')}`);
+    }
+
+    if (runtime.commands) {
+      if (runtime.commands.start) console.log(`  Start: ${runtime.commands.start}`);
+      if (runtime.commands.stop) console.log(`  Stop: ${runtime.commands.stop}`);
+    }
+
+    if (runtime.lastStarted) {
+      console.log(`  Last Started: ${runtime.lastStarted}`);
+    }
   }
 
   // Show requirements stats if .intentbridge exists
