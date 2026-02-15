@@ -62,6 +62,12 @@ ib web start
 
 ### 仪表板概览
 
+![仪表板亮色模式](../docs/screenshots/dashboard-light.png)
+*亮色模式下的仪表板*
+
+![仪表板暗色模式](../docs/screenshots/dashboard-dark.png)
+*暗色模式下的仪表板*
+
 仪表板提供项目状态的综合概览：
 
 ```
@@ -91,6 +97,12 @@ ib web start
 
 ### 需求列表
 
+![需求列表亮色模式](../docs/screenshots/requirements-list-light.png)
+*亮色模式下的需求列表*
+
+![需求列表暗色模式](../docs/screenshots/requirements-list-dark.png)
+*暗色模式下的需求列表*
+
 使用强大的控件浏览和筛选所有需求：
 
 ```
@@ -118,6 +130,9 @@ ib web start
 
 **高级筛选：**
 
+![带筛选面板的需求列表](../docs/screenshots/requirements-filters.png)
+*展开筛选面板的需求列表*
+
 点击"筛选"按钮展开筛选面板：
 
 ```
@@ -138,6 +153,9 @@ ib web start
 
 **导出选项：**
 
+![导出下拉菜单](../docs/screenshots/export-dropdown.png)
+*多种格式选项的导出下拉菜单*
+
 点击"导出"下拉菜单下载数据：
 
 ```
@@ -156,6 +174,9 @@ ib web start
 ### 暗色模式
 
 IntentBridge 支持亮色和暗色两种主题：
+
+![主题切换按钮](../docs/screenshots/theme-toggle.png)
+*标题栏中的主题切换按钮*
 
 **亮色模式：**
 - 清洁、专业的外观

@@ -62,6 +62,12 @@ Navigate to http://localhost:3000 to see your dashboard.
 
 ### Dashboard Overview
 
+![Dashboard Light Mode](../docs/screenshots/dashboard-light.png)
+*Dashboard in light mode*
+
+![Dashboard Dark Mode](../docs/screenshots/dashboard-dark.png)
+*Dashboard in dark mode*
+
 The dashboard provides a comprehensive overview of your project status:
 
 ```
@@ -91,6 +97,12 @@ The dashboard provides a comprehensive overview of your project status:
 
 ### Requirements List
 
+![Requirements List Light Mode](../docs/screenshots/requirements-list-light.png)
+*Requirements list in light mode*
+
+![Requirements List Dark Mode](../docs/screenshots/requirements-list-dark.png)
+*Requirements list in dark mode*
+
 Browse and filter all your requirements with powerful controls:
 
 ```
@@ -118,6 +130,9 @@ Browse and filter all your requirements with powerful controls:
 
 **Advanced Filtering:**
 
+![Requirements with Filters](../docs/screenshots/requirements-filters.png)
+*Requirements list with filter panel expanded*
+
 Click the "Filters" button to expand the filter panel:
 
 ```
@@ -138,6 +153,9 @@ Click the "Filters" button to expand the filter panel:
 
 **Export Options:**
 
+![Export Dropdown](../docs/screenshots/export-dropdown.png)
+*Export dropdown menu with multiple format options*
+
 Click the "Export" dropdown to download your data:
 
 ```
@@ -156,6 +174,9 @@ Click the "Export" dropdown to download your data:
 ### Dark Mode
 
 IntentBridge supports both light and dark themes:
+
+![Theme Toggle](../docs/screenshots/theme-toggle.png)
+*Theme toggle button in header*
 
 **Light Mode:**
 - Clean, professional appearance
