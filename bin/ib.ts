@@ -1,6 +1,18 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+// Read version from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJsonPath = join(__dirname, '..', '..', 'package.json');
+const packageJson = JSON.parse(
+  readFileSync(packageJsonPath, 'utf-8')
+);
+
 import { initCommand } from '../src/commands/init.js';
 import {
   reqAddCommand,
@@ -124,7 +136,7 @@ const program = new Command();
 program
   .name('ib')
   .description('IntentBridge — AI-powered requirement management for Claude Code')
-  .version('2.4.0');
+  .version(packageJson.version);
 
 // ib init
 program
