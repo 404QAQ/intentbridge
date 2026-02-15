@@ -4,6 +4,29 @@
 
 The Project Status & Chat feature allows users to monitor IntentBridge execution status and have natural language conversations with Claude Code about project requirements, implementation progress, and development suggestions.
 
+## Screenshots
+
+### Chat Interface
+
+![Project Chat Light Mode](../docs/screenshots/project-chat-light.png)
+*Project Chat interface showing execution status and chat messages in light mode*
+
+![Project Chat Dark Mode](../docs/screenshots/project-chat-dark.png)
+*Project Chat interface in dark mode*
+
+### Feature Highlights
+
+![Chat Interface Close-up](../docs/screenshots/chat-interface.png)
+*Chat interface with message history and input field*
+
+![Status Panel](../docs/screenshots/status-panel.png)
+*Execution status panel showing progress and logs*
+
+### Accessing the Feature
+
+![Chat Button Location](../docs/screenshots/chat-button.png)
+*The "Project Status & Chat" button in the requirement details page*
+
 ## Features
 
 ### 1. Execution Status Monitoring

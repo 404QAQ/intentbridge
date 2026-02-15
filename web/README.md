@@ -421,6 +421,76 @@ Clear your browser's localStorage and refresh the page. The theme toggle will in
 
 Check that the API server is running on port 9528. You can manually refresh data using the "Refresh" link.
 
+### Project Chat Issues
+
+If the "Project Status & Chat" button doesn't work:
+- Ensure both frontend and backend are running
+- Check browser console for errors
+- Verify the project ID exists in the route
+
+## 💬 Project Status & Chat (NEW! v3.2.0)
+
+IntentBridge now includes an interactive chat interface for each project!
+
+### Accessing Project Chat
+
+1. Navigate to any requirement detail page
+2. Click the "Project Status & Chat" button
+3. Start chatting with AI about your project
+
+### Features
+
+**Real-Time Status Monitoring:**
+- View execution status and progress
+- Track current tasks
+- Monitor log entries
+
+**AI-Powered Conversations:**
+- Ask questions in natural language
+- Get project insights and recommendations
+- Streaming responses for real-time feedback
+
+**Conversation History:**
+- Persistent chat history
+- Timestamp for each message
+- Easy reference and search
+
+### Screenshots
+
+![Project Chat Light Mode](../docs/screenshots/project-chat-light.png)
+*Project Chat interface in light mode*
+
+![Project Chat Dark Mode](../docs/screenshots/project-chat-dark.png)
+*Project Chat interface in dark mode*
+
+![Chat Interface](../docs/screenshots/chat-interface.png)
+*Chat messages and input area*
+
+![Status Panel](../docs/screenshots/status-panel.png)
+*Execution status panel*
+
+### Demo Mode
+
+Works without Claude API key:
+- Simulated AI responses
+- Full feature testing
+- No external dependencies
+
+To enable real AI responses:
+```bash
+export CLAUDE_API_KEY=your_key_here
+```
+
+### Usage Examples
+
+- "What are the current requirements?"
+- "What is the implementation status?"
+- "What are the next steps?"
+- "Explain REQ-001 in detail"
+- "Are there any blockers?"
+
+For detailed documentation, see [Project Chat Feature](../docs/PROJECT_CHAT_FEATURE.md).
+
 ## Future Enhancements
 
 - [ ] User authentication

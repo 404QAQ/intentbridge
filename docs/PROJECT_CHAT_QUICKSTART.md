@@ -32,6 +32,14 @@ The frontend will start at http://localhost:5173
 
 ## 🎯 Feature Demo
 
+### Screenshots
+
+![Project Chat Interface](../docs/screenshots/project-chat-light.png)
+*Project Chat interface in light mode*
+
+![Project Chat Dark Mode](../docs/screenshots/project-chat-dark.png)
+*Project Chat interface in dark mode*
+
 ### Without Claude API Key (Demo Mode)
 - System will automatically use demo mode
 - Provides simulated AI responses
