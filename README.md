@@ -560,46 +560,6 @@ Auto-sync file mappings with git:
 ib sync
 ```
 
-### CI/CD Integration
-
-```yaml
-# .github/workflows/requirements.yml
-name: Validate Requirements
-on: [push]
-
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Validate
-        run: |
-          npm install -g intentbridge
-          ib validate --all --with-code
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-```bash
-git clone https://github.com/404QAQ/intentbridge.git
-cd intentbridge
-npm install
-npm run build
-npm test
-```
-
-### Run in Development
-
-```bash
-npm run dev -- req list
-```
-
 ---
 
 ## 📝 License
@@ -613,30 +573,6 @@ MIT © [IntentBridge Team](https://github.com/404QAQ)
 - 📖 [Documentation](https://intentbridge.dev)
 - 🐛 [Issue Tracker](https://github.com/404QAQ/intentbridge/issues)
 - 💬 [Discussions](https://github.com/404QAQ/intentbridge/discussions)
-
----
-
-## 🗺️ Roadmap
-
-### v3.1 (Current) - Web UI Enhancements
-- ✅ Dark mode support
-- ✅ Real-time updates (polling)
-- ✅ Advanced filtering
-- ✅ Multi-format export (CSV, JSON, Markdown)
-
-### v3.2 - Collaboration & Extension
-- 🔜 Requirement version control
-- 🔜 Plugin system
-- 🔜 Third-party integrations (Jira, GitHub)
-- 🔜 WebSocket-based real-time updates
-
-### v3.3+ - Enterprise Features
-- 🔜 Team collaboration
-- 🔜 Advanced visualizations (Gantt charts, timeline view)
-- 🔜 REST/GraphQL API
-- 🔜 Database backends (PostgreSQL, MongoDB)
-
-See [Roadmap](https://github.com/404QAQ/intentbridge/projects) for full details.
 
 ---
 

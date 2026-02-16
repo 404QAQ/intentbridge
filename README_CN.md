@@ -560,46 +560,6 @@ ib req add --template my-template
 ib sync
 ```
 
-### CI/CD 集成
-
-```yaml
-# .github/workflows/requirements.yml
-name: 验证需求
-on: [push]
-
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: 验证
-        run: |
-          npm install -g intentbridge
-          ib validate --all --with-code
-```
-
----
-
-## 🤝 贡献
-
-我们欢迎贡献！请查看我们的[贡献指南](CONTRIBUTING.md)了解详情。
-
-### 开发设置
-
-```bash
-git clone https://github.com/404QAQ/intentbridge.git
-cd intentbridge
-npm install
-npm run build
-npm test
-```
-
-### 开发模式运行
-
-```bash
-npm run dev -- req list
-```
-
 ---
 
 ## 📝 许可证
@@ -613,30 +573,6 @@ MIT © [IntentBridge 团队](https://github.com/404QAQ)
 - 📖 [文档](https://intentbridge.dev)
 - 🐛 [问题跟踪](https://github.com/404QAQ/intentbridge/issues)
 - 💬 [讨论](https://github.com/404QAQ/intentbridge/discussions)
-
----
-
-## 🗺️ 路线图
-
-### v3.1 (当前) - Web UI 增强
-- ✅ 暗色模式支持
-- ✅ 实时更新（轮询）
-- ✅ 高级筛选
-- ✅ 多格式导出（CSV、JSON、Markdown）
-
-### v3.2 - 协作与扩展
-- 🔜 需求版本控制
-- 🔜 插件系统
-- 🔜 第三方集成（Jira、GitHub）
-- 🔜 基于 WebSocket 的实时更新
-
-### v3.3+ - 企业功能
-- 🔜 团队协作
-- 🔜 高级可视化（甘特图、时间线视图）
-- 🔜 REST/GraphQL API
-- 🔜 数据库后端（PostgreSQL、MongoDB）
-
-查看[路线图](https://github.com/404QAQ/intentbridge/projects)了解完整详情。
 
 ---
 
