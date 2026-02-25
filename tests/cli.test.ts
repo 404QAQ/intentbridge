@@ -47,7 +47,7 @@ afterEach(() => {
 describe('ib --version', () => {
   it('prints version', () => {
     const out = run('--version');
-    expect(out.trim()).toBe('2.3.0');
+    expect(out.trim()).toBe('3.6.0');
   });
 });
 

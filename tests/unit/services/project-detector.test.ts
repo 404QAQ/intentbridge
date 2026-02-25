@@ -109,7 +109,8 @@ describe('ProjectDetector', () => {
 
       expect(context.project).toBeDefined();
       expect(context.project?.path).toBe(testProjectDir);
-      expect(context.needsRegistration).toBe(false);
+      // 项目存在但未在全局配置中注册，所以需要注册
+      expect(context.needsRegistration).toBe(true);
     });
   });
 });

@@ -2,61 +2,100 @@
  * 智能路由器测试
  */
 
+import { describe, it, expect } from '@jest/globals';
 import { SmartRouter } from '../src/services/smart-router.js';
 
-console.log('🧪 测试智能路由器\n');
+describe('SmartRouter', () => {
+  const router = new SmartRouter();
 
-const router = new SmartRouter();
+  describe('自然语言解析', () => {
+    it('should parse "添加用户登录功能"', () => {
+      const result = router.parse('添加用户登录功能');
+      expect(result.command).toBe('req');
+      expect(result.action).toBe('add');
+    });
 
-// 测试用例
-const testCases = [
-  // 自然语言测试
-  { input: '添加用户登录功能', expected: { command: 'req', action: 'add' } },
-  { input: '查看所有需求', expected: { command: 'req', action: 'list' } },
-  { input: '完成 REQ-001', expected: { command: 'req', action: 'update' } },
-  { input: '启动 my-project', expected: { command: 'project', action: 'start' } },
-  { input: '停止 my-project', expected: { command: 'project', action: 'stop' } },
-  { input: '打开网页', expected: { command: 'web', action: 'start' } },
+    it('should parse "查看所有需求"', () => {
+      const result = router.parse('查看所有需求');
+      expect(result.command).toBe('req');
+      expect(result.action).toBe('list');
+    });
 
-  // 短命令测试
-  { input: 'add 登录功能', expected: { command: 'req', action: 'add' } },
-  { input: 'ls', expected: { command: 'req', action: 'list' } },
-  { input: 'done REQ-001', expected: { command: 'req', action: 'update' } },
-  { input: 'start my-project', expected: { command: 'project', action: 'start' } },
-  { input: 'stop my-project', expected: { command: 'project', action: 'stop' } },
-  { input: 'web', expected: { command: 'web', action: 'start' } },
-  { input: 'ps', expected: { command: 'project', action: 'ps' } },
-];
+    it('should parse "完成 REQ-001"', () => {
+      const result = router.parse('完成 REQ-001');
+      expect(result.command).toBe('req');
+      expect(result.action).toBe('update');
+    });
 
-let passed = 0;
-let failed = 0;
+    it('should parse "启动 my-project"', () => {
+      const result = router.parse('启动 my-project');
+      expect(result.command).toBe('project');
+      expect(result.action).toBe('start');
+    });
 
-console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    it('should parse "停止 my-project"', () => {
+      const result = router.parse('停止 my-project');
+      expect(result.command).toBe('project');
+      expect(result.action).toBe('stop');
+    });
 
-for (const test of testCases) {
-  const result = router.parse(test.input);
-  const isSuccess =
-    result.command === test.expected.command &&
-    result.action === test.expected.action;
+    it('should parse "打开网页"', () => {
+      const result = router.parse('打开网页');
+      expect(result.command).toBe('web');
+      expect(result.action).toBe('start');
+    });
+  });
 
-  if (isSuccess) {
-    console.log(`✅ ${test.input}`);
-    console.log(`   → ${result.command} ${result.action || ''} ${result.args.join(' ')}`);
-    passed++;
-  } else {
-    console.log(`❌ ${test.input}`);
-    console.log(`   期望: ${test.expected.command} ${test.expected.action || ''}`);
-    console.log(`   实际: ${result.command} ${result.action || ''}`);
-    failed++;
-  }
-  console.log('');
-}
+  describe('短命令解析', () => {
+    it('should parse "add 登录功能"', () => {
+      const result = router.parse('add 登录功能');
+      expect(result.command).toBe('req');
+      expect(result.action).toBe('add');
+    });
 
-console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-console.log(`📊 测试结果:`);
-console.log(`   ✅ 通过: ${passed}`);
-console.log(`   ❌ 失败: ${failed}`);
-console.log(`   成功率: ${((passed / testCases.length) * 100).toFixed(1)}%`);
+    it('should parse "ls"', () => {
+      const result = router.parse('ls');
+      expect(result.command).toBe('req');
+      expect(result.action).toBe('list');
+    });
 
-// 显示帮助信息
-console.log('\n' + SmartRouter.getHelp());
+    it('should parse "done REQ-001"', () => {
+      const result = router.parse('done REQ-001');
+      expect(result.command).toBe('req');
+      expect(result.action).toBe('update');
+    });
+
+    it('should parse "start my-project"', () => {
+      const result = router.parse('start my-project');
+      expect(result.command).toBe('project');
+      expect(result.action).toBe('start');
+    });
+
+    it('should parse "stop my-project"', () => {
+      const result = router.parse('stop my-project');
+      expect(result.command).toBe('project');
+      expect(result.action).toBe('stop');
+    });
+
+    it('should parse "web"', () => {
+      const result = router.parse('web');
+      expect(result.command).toBe('web');
+      expect(result.action).toBe('start');
+    });
+
+    it('should parse "ps"', () => {
+      const result = router.parse('ps');
+      expect(result.command).toBe('project');
+      expect(result.action).toBe('ps');
+    });
+  });
+
+  describe('getHelp', () => {
+    it('should return help text', () => {
+      const help = SmartRouter.getHelp();
+      expect(help).toContain('智能命令帮助');
+      expect(help).toContain('add');
+      expect(help).toContain('ls');
+    });
+  });
+});

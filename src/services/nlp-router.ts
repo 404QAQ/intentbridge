@@ -93,6 +93,7 @@ function parseWithRules(prompt: string): UserIntent {
   // Detect action
   let action: UserIntent['action'] = 'help';
   let targetType: UserIntent['targetType'] = 'global';
+  const params: Record<string, any> = {};
 
   if (lower.includes('添加') || lower.includes('创建') || lower.includes('新增')) {
     action = 'add';
@@ -122,6 +123,23 @@ function parseWithRules(prompt: string): UserIntent {
   } else if (lower.includes('搜索') || lower.includes('查找') || lower.includes('寻找')) {
     action = 'search';
     targetType = 'requirement';
+    // 提取搜索关键词
+    const searchPatterns = [
+      /搜索[：:]?\s*(.+?)\s*(?:需求|相关|$)/,
+      /查找[：:]?\s*(.+?)\s*(?:需求|相关|$)/,
+      /寻找[：:]?\s*(.+?)\s*(?:需求|相关|$)/,
+    ];
+    for (const pattern of searchPatterns) {
+      const match = prompt.match(pattern);
+      if (match) {
+        params.keyword = match[1].trim();
+        break;
+      }
+    }
+    // 如果没有匹配到，使用整个搜索词
+    if (!params.keyword) {
+      params.keyword = prompt.replace(/搜索|查找|寻找|需求|相关/g, '').trim();
+    }
   } else if (lower.includes('分析')) {
     action = 'analyze';
     targetType = 'requirement';
@@ -131,15 +149,15 @@ function parseWithRules(prompt: string): UserIntent {
   }
 
   // Extract title/description for add action
-  const params: Record<string, any> = {};
-
   if (action === 'add' && targetType === 'requirement') {
     // Try to extract requirement title
     const titlePatterns = [
-      /添加\s+(.+?)\s+需求/,
-      /创建\s+(.+?)\s+需求/,
-      /新增\s+(.+?)\s+需求/,
-      /需要一个\s+(.+)/,
+      /添加\s*(.+?)\s*需求/,
+      /创建\s*(.+?)\s*需求/,
+      /新增\s*(.+?)\s*需求/,
+      /需要一个\s*(.+)/,
+      /添加(.+)功能/,
+      /创建(.+)功能/,
     ];
 
     for (const pattern of titlePatterns) {

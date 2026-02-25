@@ -8,10 +8,22 @@ import { dirname, join } from 'node:path';
 // Read version from package.json
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const packageJsonPath = join(__dirname, '..', '..', 'package.json');
-const packageJson = JSON.parse(
-  readFileSync(packageJsonPath, 'utf-8')
-);
+
+// Try multiple possible locations for package.json
+let packageJson = { version: '3.6.0' };
+const possiblePaths = [
+  join(__dirname, '..', 'package.json'),        // For ts-node/tsx running bin/ib.ts
+  join(__dirname, '..', '..', 'package.json'),  // For compiled dist/bin/ib.js
+];
+
+for (const path of possiblePaths) {
+  try {
+    packageJson = JSON.parse(readFileSync(path, 'utf-8'));
+    break;
+  } catch {
+    // Try next path
+  }
+}
 
 import { initCommand } from '../src/commands/init.js';
 import {
