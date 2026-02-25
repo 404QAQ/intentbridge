@@ -244,6 +244,40 @@ ib project dashboard
 
 ## 📚 文档
 
+### 🚀 快速入门与帮助
+
+**IntentBridge 新手？** 从这里开始：
+- 📖 **[5 分钟快速入门](docs/QUICK_START_5MIN.md)** - 5 分钟快速上手
+- 🔧 **[故障排查指南](docs/TROUBLESHOOTING.md)** - 常见问题解决方案
+- 🎯 **[优化计划](docs/OPTIMIZATION_PLAN.md)** - 改进路线图
+
+### 💡 智能命令（新版 v3.5.0）
+
+IntentBridge 现在支持自然语言和短命令：
+
+```bash
+# 自然语言
+ib "添加用户登录功能"
+ib "查看所有需求"
+ib "完成 REQ-001"
+
+# 短命令
+ib add "登录功能"      # ib req add
+ib ls                   # ib req list
+ib done REQ-001        # ib req update --status done
+ib start my-project    # ib project start
+ib web                 # ib web start
+```
+
+### 📦 安装
+
+参见 [安装部分](#-安装) 或运行：
+```bash
+curl -fsSL https://raw.githubusercontent.com/404QAQ/intentbridge/main/install.sh | bash
+```
+
+---
+
 ### 核心命令
 
 #### 需求管理

@@ -244,6 +244,40 @@ See [Multi-Project Coordination Guide](docs/MULTI_PROJECT_COORDINATION.md) for c
 
 ## 📚 Documentation
 
+### 🚀 Quick Start & Help
+
+**New to IntentBridge?** Start here:
+- 📖 **[5-Minute Quick Start](docs/QUICK_START_5MIN.md)** - Get up and running in 5 minutes
+- 🔧 **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solutions to common problems
+- 🎯 **[Optimization Plan](docs/OPTIMIZATION_PLAN.md)** - Roadmap for improvements
+
+### 💡 Smart Commands (NEW! v3.5.0)
+
+IntentBridge now supports natural language and short commands:
+
+```bash
+# Natural language
+ib "添加用户登录功能"
+ib "查看所有需求"
+ib "完成 REQ-001"
+
+# Short commands
+ib add "登录功能"      # ib req add
+ib ls                   # ib req list
+ib done REQ-001        # ib req update --status done
+ib start my-project    # ib project start
+ib web                 # ib web start
+```
+
+### 📦 Installation
+
+See [Installation Section](#-installation) or run:
+```bash
+curl -fsSL https://raw.githubusercontent.com/404QAQ/intentbridge/main/install.sh | bash
+```
+
+---
+
 ### Core Commands
 
 #### Requirement Management
