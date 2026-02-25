@@ -251,6 +251,14 @@ See [Multi-Project Coordination Guide](docs/MULTI_PROJECT_COORDINATION.md) for c
 - 🔧 **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solutions to common problems
 - 🎯 **[Optimization Plan](docs/OPTIMIZATION_PLAN.md)** - Roadmap for improvements
 
+### 📚 Practical Tutorials (NEW! v3.5.0)
+
+**Hands-on learning with real projects**:
+- 📝 **[Tutorial 1: Personal Blog System](docs/tutorials/TUTORIAL_01_BLOG.md)** - 30 min, beginner (⭐⭐☆☆☆)
+- 🛒 **[Tutorial 2: E-commerce Backend](docs/tutorials/TUTORIAL_02_ECOMMERCE.md)** - 45 min, intermediate (⭐⭐⭐☆☆)
+- 🏗️ **[Tutorial 3: Microservices Architecture](docs/tutorials/TUTORIAL_03_MICROSERVICES.md)** - 60 min, advanced (⭐⭐⭐⭐☆)
+- 📋 **[All Tutorials](docs/tutorials/README.md)** - Complete tutorial index
+
 ### 💡 Smart Commands (NEW! v3.5.0)
 
 IntentBridge now supports natural language and short commands:

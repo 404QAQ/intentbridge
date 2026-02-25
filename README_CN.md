@@ -251,6 +251,14 @@ ib project dashboard
 - 🔧 **[故障排查指南](docs/TROUBLESHOOTING.md)** - 常见问题解决方案
 - 🎯 **[优化计划](docs/OPTIMIZATION_PLAN.md)** - 改进路线图
 
+### 📚 实战教程（新版 v3.5.0）
+
+**通过实际项目学习**：
+- 📝 **[教程 1：个人博客系统](docs/tutorials/TUTORIAL_01_BLOG.md)** - 30 分钟，入门级（⭐⭐☆☆☆）
+- 🛒 **[教程 2：电商后台](docs/tutorials/TUTORIAL_02_ECOMMERCE.md)** - 45 分钟，进阶级（⭐⭐⭐☆☆）
+- 🏗️ **[教程 3：微服务架构](docs/tutorials/TUTORIAL_03_MICROSERVICES.md)** - 60 分钟，高级（⭐⭐⭐⭐☆）
+- 📋 **[所有教程](docs/tutorials/README.md)** - 完整教程索引
+
 ### 💡 智能命令（新版 v3.5.0）
 
 IntentBridge 现在支持自然语言和短命令：
