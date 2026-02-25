@@ -249,6 +249,7 @@ ib project dashboard
 **IntentBridge 新手？** 从这里开始：
 - 📖 **[5 分钟快速入门](docs/QUICK_START_5MIN.md)** - 5 分钟快速上手
 - 🔧 **[故障排查指南](docs/TROUBLESHOOTING.md)** - 常见问题解决方案
+- ❌ **[错误代码参考](docs/ERROR_CODES.md)** - 完整错误代码文档
 - 🎯 **[优化计划](docs/OPTIMIZATION_PLAN.md)** - 改进路线图
 
 ### 📚 实战教程（新版 v3.5.0）

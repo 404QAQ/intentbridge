@@ -249,6 +249,7 @@ See [Multi-Project Coordination Guide](docs/MULTI_PROJECT_COORDINATION.md) for c
 **New to IntentBridge?** Start here:
 - 📖 **[5-Minute Quick Start](docs/QUICK_START_5MIN.md)** - Get up and running in 5 minutes
 - 🔧 **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solutions to common problems
+- ❌ **[Error Codes Reference](docs/ERROR_CODES.md)** - Complete error code documentation
 - 🎯 **[Optimization Plan](docs/OPTIMIZATION_PLAN.md)** - Roadmap for improvements
 
 ### 📚 Practical Tutorials (NEW! v3.5.0)
