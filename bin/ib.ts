@@ -142,9 +142,13 @@ program
 program
   .command('init')
   .description('Initialize IntentBridge in current directory')
-  .action(async () => {
+  .option('-n, --name <name>', 'Project name (non-interactive mode)')
+  .option('-d, --description <description>', 'Project description')
+  .option('-t, --tech <tech>', 'Tech stack (comma-separated)')
+  .option('-c, --conventions <conventions>', 'Conventions (comma-separated)')
+  .action(async (options) => {
     try {
-      await initCommand();
+      await initCommand(options);
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);
@@ -160,9 +164,18 @@ req
   .command('add')
   .description('Add a new requirement')
   .option('-t, --template <name>', 'Use a template')
-  .action(async (options: { template?: string }) => {
+  .option('--title <title>', 'Requirement title (non-interactive mode)')
+  .option('-d, --description <description>', 'Requirement description')
+  .option('-p, --priority <priority>', 'Priority (high/medium/low)')
+  .action(async (options: { template?: string; title?: string; description?: string; priority?: string }) => {
     try {
-      await reqAddCommand(options.template);
+      if (options.template) {
+        await reqAddCommand(options.template);
+      } else if (options.title) {
+        await reqAddCommand({ title: options.title, description: options.description, priority: options.priority });
+      } else {
+        await reqAddCommand();
+      }
     } catch (e: any) {
       console.error(e.message);
       process.exit(1);

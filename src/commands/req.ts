@@ -24,12 +24,34 @@ import type { RequirementPriority, RequirementStatus } from '../models/types.js'
 const VALID_STATUSES: RequirementStatus[] = ['draft', 'active', 'implementing', 'done'];
 const VALID_PRIORITIES: RequirementPriority[] = ['high', 'medium', 'low'];
 
-export async function reqAddCommand(template?: string): Promise<void> {
-  if (template) {
-    await reqAddCommandWithTemplate(template);
+export interface ReqAddOptions {
+  title?: string;
+  description?: string;
+  priority?: string;
+}
+
+export async function reqAddCommand(templateOrOptions?: string | ReqAddOptions): Promise<void> {
+  // 如果是模板名称（字符串且不是对象）
+  if (typeof templateOrOptions === 'string') {
+    await reqAddCommandWithTemplate(templateOrOptions);
     return;
   }
 
+  const options = templateOrOptions || {};
+
+  // 非交互式模式
+  if (options.title) {
+    const priority = VALID_PRIORITIES.includes(options.priority as RequirementPriority)
+      ? (options.priority as RequirementPriority)
+      : 'medium';
+
+    const req = addRequirement(options.title, options.description || '', priority);
+    console.log(chalk.green(`✔ Created ${chalk.bold(req.id)}: ${req.title}`));
+    console.log(chalk.dim('  Run `ib gen` to update CLAUDE.md'));
+    return;
+  }
+
+  // 交互式模式
   console.log(chalk.bold('Add Requirement'));
   console.log('');
 
