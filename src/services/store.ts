@@ -137,7 +137,7 @@ export function addFileMapping(id: string, files: string[], cwd?: string): Requi
   const req = data.requirements.find((r) => r.id === id);
   if (!req) throw new Error(`Requirement ${id} not found`);
   for (const f of files) {
-    if (!req.files.includes(f)) {
+    if (!req.files) req.files = []; if (!req.files.includes(f)) {
       req.files.push(f);
     }
   }
@@ -149,6 +149,7 @@ export function removeFileMapping(id: string, file: string, cwd?: string): Requi
   const data = readRequirements(cwd);
   const req = data.requirements.find((r) => r.id === id);
   if (!req) throw new Error(`Requirement ${id} not found`);
+  if (!req.files) req.files = [];
   const idx = req.files.indexOf(file);
   if (idx === -1) throw new Error(`File ${file} not mapped to ${id}`);
   req.files.splice(idx, 1);

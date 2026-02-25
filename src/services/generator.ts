@@ -28,7 +28,7 @@ function renderRequirement(lines: string[], r: Requirement): void {
       lines.push(`- [${n.date}] ${n.content}`);
     }
   }
-  if (r.files.length > 0) {
+  if (r.files && r.files.length > 0) {
     lines.push(`相关文件: ${r.files.join(', ')}`);
   }
   lines.push('');
@@ -140,7 +140,7 @@ export function generateBlock(project: ProjectConfig, requirements: Requirements
     : requirements.requirements;
   const fileMap = new Map<string, string[]>();
   for (const r of sourceReqs) {
-    for (const f of r.files) {
+    for (const f of (r.files || [])) {
       if (!fileMap.has(f)) fileMap.set(f, []);
       fileMap.get(f)!.push(r.id);
     }

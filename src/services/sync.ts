@@ -15,7 +15,7 @@ function getMappedFiles(cwd?: string): Map<string, string[]> {
   const data = readRequirements(cwd);
   const map = new Map<string, string[]>();
   for (const r of data.requirements) {
-    for (const f of r.files) {
+    for (const f of (r.files || [])) {
       if (!map.has(f)) map.set(f, []);
       map.get(f)!.push(r.id);
     }
