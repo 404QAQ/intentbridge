@@ -41,7 +41,11 @@
 | **Requirement Management** | Full CRUD operations, tags, acceptance criteria, dependencies |
 | **AI-Powered Understanding** | Generate deep understanding, impact analysis, completion validation |
 | **Multi-Project Support** | Register, switch, link, and share files across projects |
-| **Multi-Project Coordination** | **NEW v3.4.0**: Port management, process monitoring, resource coordination |
+| **Multi-Project Coordination** | **v3.4.0**: Port management, process monitoring, resource coordination |
+| **Smart Commands** | **NEW v3.6.0**: Natural language, short aliases, auto-completion |
+| **Error System** | **NEW v3.6.0**: 58 error codes, multilingual support, friendly messages |
+| **Performance Monitoring** | **NEW v3.6.0**: Execution time, memory usage, performance reports |
+| **Intelligent Cache** | **NEW v3.6.0**: Multi-layer cache, auto-invalidation, LRU eviction |
 | **Progressive Context** | L0 (Raw) → L1 (Standardized) → L2 (Structured) → L3 (AI-Enhanced) → L4 (Code-Anchored) |
 | **MCP Bridge** | Export context for Claude Code, session management |
 | **Natural Language Router** | `ib do "add user auth requirement"` - just describe what you want |
@@ -53,7 +57,10 @@
 2. **Natural Language Commands** - No need to memorize complex CLI syntax
 3. **AI Project Scaffolding** - One command creates complete project structure with docs
 4. **MCP Protocol** - Real bidirectional communication with Claude Code
-5. **Multi-Project Coordination** - **NEW v3.4.0**: Manage ports, processes, and resources across multiple projects
+5. **Multi-Project Coordination** - Manage ports, processes, and resources across multiple projects
+6. **Smart Command System** - **NEW v3.6.0**: Natural language + short aliases + auto-completion
+7. **Intelligent Error System** - **NEW v3.6.0**: 58 error codes with multilingual support
+8. **Performance & Cache** - **NEW v3.6.0**: Built-in monitoring and intelligent caching
 
 ---
 
