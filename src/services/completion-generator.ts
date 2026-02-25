@@ -32,7 +32,7 @@ _ib_completion() {
     "
 
     # 子命令参数
-    case ${prev} in
+    case \${prev} in
         ib)
             COMPREPLY=( $(compgen -W "\${commands}" -- \${cur}) )
             return 0

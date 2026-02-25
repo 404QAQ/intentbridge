@@ -82,7 +82,7 @@ export function reqListCommand(): void {
         r.priority === 'high' ? chalk.red('H') :
         r.priority === 'medium' ? chalk.yellow('M') :
         chalk.dim('L');
-      const files = r.files.length > 0 ? chalk.dim(` [${r.files.length} files]`) : '';
+      const files = (r.files && r.files.length > 0) ? chalk.dim(` [${r.files.length} files]`) : '';
       console.log(`    ${r.id}  ${prio}  ${r.title}${files}`);
     }
   }

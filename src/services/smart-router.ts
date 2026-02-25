@@ -125,7 +125,8 @@ export class SmartRouter {
         command: 'req',
         action: 'add',
         args: content ? [content] : [],
-        options: this.extractOptions(text)
+        options: this.extractOptions(text),
+        originalInput: input
       };
     }
 
@@ -135,7 +136,8 @@ export class SmartRouter {
         command: 'req',
         action: 'list',
         args: [],
-        options: this.extractOptions(text)
+        options: this.extractOptions(text),
+        originalInput: input
       };
     }
 
@@ -146,7 +148,8 @@ export class SmartRouter {
         command: 'req',
         action: 'update',
         args: reqId ? [reqId, '--status', 'done'] : [],
-        options: {}
+        options: {},
+        originalInput: input
       };
     }
 
@@ -157,7 +160,8 @@ export class SmartRouter {
         command: 'project',
         action: 'start',
         args: projectName ? [projectName] : [],
-        options: this.extractOptions(text)
+        options: this.extractOptions(text),
+        originalInput: input
       };
     }
 
@@ -168,7 +172,8 @@ export class SmartRouter {
         command: 'project',
         action: 'stop',
         args: projectName ? [projectName] : [],
-        options: {}
+        options: {},
+        originalInput: input
       };
     }
 
@@ -178,7 +183,8 @@ export class SmartRouter {
         command: 'web',
         action: 'start',
         args: [],
-        options: {}
+        options: {},
+        originalInput: input
       };
     }
 
@@ -193,7 +199,7 @@ export class SmartRouter {
     const firstPart = parts[0];
 
     // 查找别名
-    const alias = this.aliases.find(a => a.short === firstPart);
+    const alias = SmartRouter.aliases.find((a: CommandAlias) => a.short === firstPart);
     if (alias) {
       const [command, action] = alias.full.split(' ');
       const args = parts.slice(1);
@@ -204,7 +210,8 @@ export class SmartRouter {
           command: 'req',
           action: 'update',
           args: [args[0], '--status', 'done'],
-          options: {}
+          options: {},
+          originalInput: input
         };
       }
 
@@ -212,7 +219,8 @@ export class SmartRouter {
         command,
         action,
         args,
-        options: {}
+        options: {},
+        originalInput: input
       };
     }
 

@@ -20,7 +20,7 @@ export interface ErrorMessage {
 /**
  * 中文错误消息
  */
-export const errorMessages_zh_CN: Record<ErrorCode, ErrorMessage> = {
+export const errorMessages_zh_CN: Partial<Record<ErrorCode, ErrorMessage>> = {
   // ============================================
   // E1xxx: 安装和初始化错误
   // ============================================
@@ -431,7 +431,7 @@ export const errorMessages_zh_CN: Record<ErrorCode, ErrorMessage> = {
 /**
  * 英文错误消息
  */
-export const errorMessages_en_US: Record<ErrorCode, ErrorMessage> = {
+export const errorMessages_en_US: Partial<Record<ErrorCode, ErrorMessage>> = {
   // ============================================
   // E1xxx: Installation and Initialization Errors
   // ============================================
@@ -506,5 +506,9 @@ export function getErrorMessage(
   language: Language = 'zh-CN'
 ): ErrorMessage {
   const messages = language === 'zh-CN' ? errorMessages_zh_CN : errorMessages_en_US;
-  return messages[code];
+  return messages[code] || {
+    title: `错误 ${code}`,
+    message: '发生未知错误',
+    solution: '请检查错误代码文档或联系支持',
+  };
 }

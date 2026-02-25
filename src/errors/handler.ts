@@ -361,4 +361,5 @@ export function throwError(
  */
 export function handleError(error: Error, exitCode?: number): never {
   ErrorHandler.getInstance().handle(error, exitCode);
+  throw new Error('unreachable'); // for TypeScript
 }

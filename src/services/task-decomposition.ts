@@ -269,25 +269,35 @@ function decomposeWithRules(prd: any): Task[] {
  */
 function decomposeRequirementWithRules(requirement: Requirement): Task[] {
   const tasks: Task[] = [];
-  let taskNum = 1;
   const baseId = requirement.id;
+
+  // 获取现有任务，计算下一个任务 ID
+  const existingTasks = loadTasks();
+  let nextNum = 1;
+  if (existingTasks.tasks.length > 0) {
+    const maxNum = existingTasks.tasks.reduce((max, t) => {
+      const num = parseInt(t.id.replace('T-', ''), 10);
+      return num > max ? num : max;
+    }, 0);
+    nextNum = maxNum + 1;
+  }
 
   // 如果有 features，基于 features 拆解
   if (requirement.features && requirement.features.length > 0) {
     for (const feature of requirement.features) {
-      tasks.push(createTask(`T-${String(taskNum++).padStart(3, '0')}`, baseId, feature, 'frontend'));
-      tasks.push(createTask(`T-${String(taskNum++).padStart(3, '0')}`, baseId, feature, 'backend'));
-      tasks.push(createTask(`T-${String(taskNum++).padStart(3, '0')}`, baseId, feature, 'testing'));
+      tasks.push(createTask(`T-${String(nextNum++).padStart(3, '0')}`, baseId, feature, 'frontend'));
+      tasks.push(createTask(`T-${String(nextNum++).padStart(3, '0')}`, baseId, feature, 'backend'));
+      tasks.push(createTask(`T-${String(nextNum++).padStart(3, '0')}`, baseId, feature, 'testing'));
     }
   } else {
     // 否则创建通用任务
-    tasks.push(createGenericTask(`T-001`, baseId, requirement.title, 'frontend'));
-    tasks.push(createGenericTask(`T-002`, baseId, requirement.title, 'backend'));
-    tasks.push(createGenericTask(`T-003`, baseId, requirement.title, 'testing'));
+    tasks.push(createGenericTask(`T-${String(nextNum++).padStart(3, '0')}`, baseId, requirement.title, 'frontend'));
+    tasks.push(createGenericTask(`T-${String(nextNum++).padStart(3, '0')}`, baseId, requirement.title, 'backend'));
+    tasks.push(createGenericTask(`T-${String(nextNum++).padStart(3, '0')}`, baseId, requirement.title, 'testing'));
   }
 
   // 部署任务
-  tasks.push(createDeploymentTask(`T-${String(taskNum).padStart(3, '0')}`, baseId));
+  tasks.push(createDeploymentTask(`T-${String(nextNum).padStart(3, '0')}`, baseId));
 
   return tasks;
 }
@@ -628,6 +638,48 @@ export function readTasks(): TasksData {
 export function saveTasks(data: TasksData): void {
   initEngine();
   writeFileSync(tasksPath, yaml.dump(data, { lineWidth: -1 }));
+}
+
+/**
+ * 更新任务状态
+ */
+export function updateTask(
+  taskId: string,
+  updates: {
+    status?: string;
+    actualHours?: number;
+  }
+): Task {
+  initEngine();
+
+  const tasksData = readTasks();
+  const taskIndex = tasksData.tasks.findIndex((t) => t.id === taskId);
+
+  if (taskIndex === -1) {
+    throw new Error(`Task ${taskId} not found`);
+  }
+
+  const task = tasksData.tasks[taskIndex];
+
+  if (updates.status) {
+    task.status = updates.status as any;
+
+    // 更新时间戳
+    if (updates.status === 'in_progress' && !task.startedAt) {
+      task.startedAt = new Date().toISOString();
+    } else if (updates.status === 'done' && !task.completedAt) {
+      task.completedAt = new Date().toISOString();
+    }
+  }
+
+  if (updates.actualHours !== undefined) {
+    task.actualHours = updates.actualHours;
+  }
+
+  tasksData.tasks[taskIndex] = task;
+  saveTasks(tasksData);
+
+  return task;
 }
 
 /**

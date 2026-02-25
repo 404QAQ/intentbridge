@@ -15,6 +15,7 @@ import {
   readTasks,
   decomposeRequirement,
   getNextTaskId,
+  updateTask,
 } from '../services/task-decomposition.js';
 import { readRequirements } from '../services/store.js';
 import type { Task, ExecutionPlan } from '../models/types.js';
@@ -120,6 +121,59 @@ export async function taskPlanCommand() {
     }
 
     displayExecutionPlan(tasksData.executionPlan);
+  } catch (error: any) {
+    console.error(chalk.red(`\n❌ 错误: ${error.message}\n`));
+    process.exit(1);
+  }
+}
+
+/**
+ * task update 命令
+ */
+export async function taskUpdateCommand(
+  taskId: string,
+  options: { status?: string; hours?: string }
+) {
+  try {
+    const updates: { status?: string; actualHours?: number } = {};
+
+    if (options.status) {
+      const validStatuses = ['pending', 'in_progress', 'done', 'failed', 'blocked'];
+      if (!validStatuses.includes(options.status)) {
+        console.error(chalk.red(`\n❌ 无效的状态: ${options.status}`));
+        console.log(chalk.gray(`有效状态: ${validStatuses.join(', ')}\n`));
+        process.exit(1);
+      }
+      updates.status = options.status;
+    }
+
+    if (options.hours) {
+      const hours = parseFloat(options.hours);
+      if (isNaN(hours) || hours < 0) {
+        console.error(chalk.red(`\n❌ 无效的工时: ${options.hours}\n`));
+        process.exit(1);
+      }
+      updates.actualHours = hours;
+    }
+
+    if (!updates.status && updates.actualHours === undefined) {
+      console.error(chalk.red('\n❌ 请至少指定 --status 或 --hours 选项\n'));
+      process.exit(1);
+    }
+
+    const task = updateTask(taskId, updates);
+
+    console.log(chalk.green(`\n✅ 任务 ${taskId} 已更新`));
+
+    if (updates.status) {
+      console.log(`  状态: ${getStatusIcon(task.status)} ${task.status}`);
+    }
+
+    if (updates.actualHours !== undefined) {
+      console.log(`  实际工时: ${task.actualHours}小时`);
+    }
+
+    console.log();
   } catch (error: any) {
     console.error(chalk.red(`\n❌ 错误: ${error.message}\n`));
     process.exit(1);
@@ -352,4 +406,11 @@ export function registerTaskCommand(program: Command) {
     .command('plan')
     .description('查看执行计划')
     .action(taskPlanCommand);
+
+  task
+    .command('update <task-id>')
+    .description('更新任务状态')
+    .option('-s, --status <status>', '任务状态 (pending, in_progress, done, failed, blocked)')
+    .option('-h, --hours <hours>', '实际工时')
+    .action(taskUpdateCommand);
 }

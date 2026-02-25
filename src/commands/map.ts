@@ -22,7 +22,7 @@ export function mapRemoveCommand(reqId: string, file: string): void {
 
 export function mapListCommand(): void {
   const data = readRequirements();
-  const mapped = data.requirements.filter((r) => r.files.length > 0);
+  const mapped = data.requirements.filter((r) => r.files && r.files.length > 0);
 
   if (mapped.length === 0) {
     console.log(chalk.dim('No file mappings yet. Run `ib map add <req-id> <file...>` to add.'));
@@ -41,7 +41,7 @@ export function mapListCommand(): void {
 export function mapWhichCommand(file: string): void {
   const data = readRequirements();
   const matches = data.requirements.filter((r) =>
-    r.files.some((f) => f.includes(file))
+    r.files && r.files.some((f) => f.includes(file))
   );
 
   if (matches.length === 0) {
