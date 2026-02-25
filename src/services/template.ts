@@ -6,9 +6,10 @@ import type { Requirement, RequirementPriority } from '../models/types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// Templates are copied to dist/templates during build
-// This file is at dist/src/services/template.js, so we need to go up 2 levels
-const TEMPLATES_DIR = join(__dirname, '..', '..', 'templates');
+// Templates are in templates/ directory at same level as services/
+// src/services -> src/templates (for source)
+// dist/services -> dist/templates (for compiled)
+const TEMPLATES_DIR = join(__dirname, '..', 'templates');
 
 export interface RequirementTemplate {
   title: string;

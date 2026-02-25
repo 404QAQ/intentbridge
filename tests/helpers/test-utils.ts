@@ -1,6 +1,10 @@
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Create a test project with .intentbridge directory
@@ -48,8 +52,11 @@ export function runCommand(command: string, cwd?: string): {
   stderr: string;
   exitCode: number;
 } {
+  const projectRoot = join(__dirname, '..', '..');
+  const cliPath = join(projectRoot, 'dist', 'bin', 'ib.js');
+
   try {
-    const stdout = execSync(`node dist/bin/ib.js ${command}`, {
+    const stdout = execSync(`node "${cliPath}" ${command}`, {
       encoding: 'utf-8',
       cwd: cwd || process.cwd(),
       timeout: 5000,

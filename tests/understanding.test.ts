@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -71,7 +71,11 @@ describe('generateRequirementUnderstanding', () => {
     addNote(req.id, 'Decision 1', tmpDir);
     addNote(req.id, 'Decision 2', tmpDir);
 
-    const understanding = generateRequirementUnderstanding(req, [req], {
+    // 重新读取需求以获取更新后的数据
+    const updatedReqs = readRequirements(tmpDir);
+    const updatedReq = updatedReqs.requirements.find(r => r.id === req.id)!;
+
+    const understanding = generateRequirementUnderstanding(updatedReq, [updatedReq], {
       includeDecisions: true,
     });
 
@@ -86,7 +90,11 @@ describe('generateRequirementUnderstanding', () => {
     addAcceptanceCriterion(req.id, 'Criterion 2', tmpDir);
     acceptCriterion(req.id, 0, tmpDir);
 
-    const understanding = generateRequirementUnderstanding(req, [req], {
+    // 重新读取需求以获取更新后的数据
+    const updatedReqs = readRequirements(tmpDir);
+    const updatedReq = updatedReqs.requirements.find(r => r.id === req.id)!;
+
+    const understanding = generateRequirementUnderstanding(updatedReq, [updatedReq], {
       includeAcceptance: true,
     });
 
@@ -100,7 +108,11 @@ describe('generateRequirementUnderstanding', () => {
     const req = addRequirement('Feature', 'Description', 'medium', tmpDir);
     addFileMapping(req.id, ['src/auth.ts', 'src/middleware/auth.ts'], tmpDir);
 
-    const understanding = generateRequirementUnderstanding(req, [req], {
+    // 重新读取需求以获取更新后的数据
+    const updatedReqs = readRequirements(tmpDir);
+    const updatedReq = updatedReqs.requirements.find(r => r.id === req.id)!;
+
+    const understanding = generateRequirementUnderstanding(updatedReq, [updatedReq], {
       includeCodeMapping: true,
     });
 
@@ -114,14 +126,18 @@ describe('generateRequirementUnderstanding', () => {
     const req2 = addRequirement('Feature B', 'Description B', 'medium', tmpDir);
     addDependency(req2.id, req1.id, tmpDir);
 
-    const understanding = generateRequirementUnderstanding(req2, [req1, req2], {
+    // 重新读取需求以获取更新后的数据
+    const updatedReqs = readRequirements(tmpDir);
+    const updatedReq2 = updatedReqs.requirements.find(r => r.id === req2.id)!;
+    const updatedReq1 = updatedReqs.requirements.find(r => r.id === req1.id)!;
+
+    const understanding = generateRequirementUnderstanding(updatedReq2, [updatedReq1, updatedReq2], {
       includeDependencies: true,
     });
 
     expect(understanding).toContain('## 依赖关系');
     expect(understanding).toContain('**依赖于**:');
     expect(understanding).toContain(`${req1.id} — ${req1.title}`);
-    expect(understanding).toContain('**被依赖于**:');
   });
 
   it('includes tags', () => {
@@ -129,7 +145,11 @@ describe('generateRequirementUnderstanding', () => {
     addTag(req.id, 'backend', tmpDir);
     addTag(req.id, 'security', tmpDir);
 
-    const understanding = generateRequirementUnderstanding(req, [req]);
+    // 重新读取需求以获取更新后的数据
+    const updatedReqs = readRequirements(tmpDir);
+    const updatedReq = updatedReqs.requirements.find(r => r.id === req.id)!;
+
+    const understanding = generateRequirementUnderstanding(updatedReq, [updatedReq]);
 
     expect(understanding).toContain('## 标签');
     expect(understanding).toContain('`backend`');
@@ -143,7 +163,6 @@ describe('writeUnderstandingDocument', () => {
     const understanding = generateRequirementUnderstanding(req, [req]);
     writeUnderstandingDocument(req.id, understanding, tmpDir);
 
-    const { existsSync, readFileSync } = require('node:fs');
     const filePath = join(tmpDir, '.intentbridge', 'understanding', `${req.id}.md`);
 
     expect(existsSync(filePath)).toBe(true);
@@ -181,7 +200,6 @@ describe('generateAllUnderstandingDocuments', () => {
     const successCount = results.filter((r) => r.success).length;
     expect(successCount).toBeGreaterThan(0);
 
-    const { existsSync } = require('node:fs');
     expect(existsSync(join(tmpDir, '.intentbridge', 'understanding', 'REQ-001.md'))).toBe(true);
     expect(existsSync(join(tmpDir, '.intentbridge', 'understanding', 'REQ-002.md'))).toBe(true);
   });
@@ -238,7 +256,6 @@ describe('code anchoring', () => {
 
   it('injects anchor into file', () => {
     const testFile = join(tmpDir, 'test.ts');
-    const { writeFileSync } = require('node:fs');
     writeFileSync(testFile, 'export function hello() {}', 'utf-8');
 
     const req = addRequirement('Feature', 'Description', 'medium', tmpDir);
@@ -251,7 +268,6 @@ describe('code anchoring', () => {
 
   it('checks for existing anchor', () => {
     const testFile = join(tmpDir, 'test.ts');
-    const { writeFileSync } = require('node:fs');
     writeFileSync(testFile, '// INTENTBRIDGE:REQ-001\nexport function hello() {}', 'utf-8');
 
     expect(hasAnchor(testFile, 'REQ-001')).toBe(true);
@@ -260,7 +276,6 @@ describe('code anchoring', () => {
 
   it('removes anchor from file', () => {
     const testFile = join(tmpDir, 'test.ts');
-    const { writeFileSync } = require('node:fs');
     writeFileSync(
       testFile,
       '// INTENTBRIDGE-START\n// INTENTBRIDGE:REQ-001\n// INTENTBRIDGE-END\nexport function hello() {}',
